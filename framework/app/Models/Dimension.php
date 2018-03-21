@@ -14,6 +14,7 @@ class Dimension extends Model{
         'dim_code',
         'dim_type',
         'description',
+        'company_id',
         'status'
     ];
 
@@ -21,7 +22,15 @@ class Dimension extends Model{
         'id'
     ];
 
-    public function dimensions(){
-        return $this->belongsToMany('App\Models\AccountData', 'account_dimension', 'dim_id', 'account_id');
+    // public function dimensions(){
+    //     return $this->belongsToMany('App\Models\Account', 'account_dimension', 'dim_id', 'account_id');
+    // }
+
+    public function dim_type(){
+        return $this->belongsTo('App\Models\DimensionType', 'dim_type');
+    }
+
+    public function company(){
+        return $this->belongsTo('App\Models\Company', 'company_id');
     }
 }

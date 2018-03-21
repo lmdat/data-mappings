@@ -5,6 +5,9 @@ return [
     'account' => 'Account',
         'define_account' => 'Define Account',
 
+    'dimension' => 'Dimension',
+        'define_dimension' => 'Define Dimension',
+
     'mappings_item' => 'Mappings Item',
         'define_mappings_item' => 'Define Item',
         'item_attribute' => 'Item Attribute',

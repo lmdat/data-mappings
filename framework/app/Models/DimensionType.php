@@ -19,7 +19,7 @@ class DimensionType extends Model{
         'id'
     ];
 
-    public function items(){
-        return $this->hasMany('App\Models\MappingsItem', 'type_id');
+    public function dimensions(){
+        return $this->hasMany('App\Models\Dimension', 'dim_type');
     }
 }

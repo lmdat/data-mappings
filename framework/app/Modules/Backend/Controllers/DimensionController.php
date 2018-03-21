@@ -4,12 +4,13 @@ namespace App\Modules\Backend\Controllers;
 use Illuminate\Http\Request;
 use App\Libs\Utils\Vii;
 
-use App\Models\Account;
+use App\Models\Dimension;
+use App\Models\DimensionType;
 use App\Models\Company;
 
 
-class AccountController extends Controller{
-    const LANG_NAME = 'account';
+class DimensionController extends Controller{
+    const LANG_NAME = 'dimension';
 
     public function __construct(){
         parent::__construct();
@@ -22,7 +23,7 @@ class AccountController extends Controller{
 
     }
 
-    public function getAccount(Request $request, $id=null){
+    public function getDimension(Request $request, $id=null){
 
         $display_rows = $request->input('rows_per_page', 15);
 
@@ -30,13 +31,18 @@ class AccountController extends Controller{
         // unset($aqs['page']);
         $paging_qs = Vii::queryStringBuilder($aqs);
 
-        $entries = Account::select('*')
-            ->orderBy('account_name', 'ASC')
+        $com_id = 1;
+
+        $entries = Dimension::where('company_id', $com_id)
+            ->select('*')
+            ->orderBy('dim_name', 'ASC')
             ->paginate($display_rows);
         
-        $entries->withPath(route('account', [str_replace('?', '', $paging_qs)]));
+        $entries->withPath(route('dimension', [str_replace('?', '', $paging_qs)]));
 
         $companies = Company::all();
+
+        $dim_type = DimensionType::all();
         
         //dd($entries->toArray());
 
@@ -44,15 +50,15 @@ class AccountController extends Controller{
             $account = Account::findOrFail($id);
             // dd($account);
             return view(
-                'Backend::account.edit-account',
+                'Backend::dimension.edit-dimension',
                 [
-                    'form_uri' => ($id == null) ? route('account-post-create') : route('account-put-edit', [$id]),
-                    'page_title' => 'Define Account',
+                    'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
+                    'page_title' => 'Define Dimension',
                     'entries' => $entries,
                     'qs' => Vii::queryStringBuilder($request->getQueryString()),
                     'account' => $account,
                     'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
-                    //'type_list' => Vii::createOptionData($mappings_type->toArray(), 'id', ['type_name', 'short_code']),
+                    'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
                     
                     
                     //'user' => session()->get('test-name', $full_name)
@@ -62,39 +68,39 @@ class AccountController extends Controller{
         }
        
         return view(
-            'Backend::account.add-account',
+            'Backend::dimension.add-dimension',
             [
-                'form_uri' => ($id == null) ? route('account-post-create') : route('account-put-edit', [$id]),
-                'page_title' => 'Define Account',
+                'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
+                'page_title' => 'Define Dimension',
                 'entries' => $entries,
                 'qs' => Vii::queryStringBuilder($request->getQueryString()),
                 'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
-                //'type_list' => Vii::createOptionData($mappings_type->toArray(), 'id', ['type_name', 'short_code']),
+                'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
                 
                 //'user' => session()->get('test-name', $full_name)
             ]
         );
     }
 
-    public function postCreateAccount(Request $request){
+    public function postCreateDimension(Request $request){
        
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
         if($request->get('show_multiple') == null){
-            $form = $request->only(['account_name', 'account_code']);
-            $account = new Account($form);
-            $account->status = 1;
+            $form = $request->only(['dim_name', 'dim_code', 'company_id', 'dim_type']);
+            $dim = new Dimension($form);
+            $dim->status = 1;
 
-            if($account->save()){
+            if($dim->save()){
                 return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('success-message', "1 account is created.");
+                    ->route('dimension', [str_replace('?', '', $qs)])
+                    ->with('success-message', "1 dimension is created.");
             }
 
             // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
             return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('error-message', 'Cannot create new account.');
+                    ->route('dimension', [str_replace('?', '', $qs)])
+                    ->with('error-message', 'Cannot create new dimension.');
         }
         else{
             // $accounts = explode("\r\n", $request->get('multiple_account'));
@@ -129,34 +135,36 @@ class AccountController extends Controller{
                 array_shift($arr);
 
             // $arr = array_unique($arr);
-            
+            dd($arr);
             $data = [];
             foreach($arr as $item){
                 $a = explode(';', $item);
                 $_code = trim($a[0]);
                 $_name = trim($a[1]);
-                if(array_key_exists($_code, $data))
+                if(array_key_exists($_code, $data) || $_code == '')
                     continue;
                     
                 $data[$_code] = [
-                    'account_code' => $_code,
-                    'account_name' => $_name,
+                    'dim_code' => $_code,
+                    'dim_name' => $_name,
+                    'company_id' => intval($request->post('company_id')),
+                    'dim_type' => intval($request->post('dim_type')),
                     'status' => 1
                 ];
             }
 
-            if(Account::insert($data)){
+            if(Dimension::insert($data)){
                 $c = count($data);
                 
                 return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('success-message', "{$c} accounts are created.");
+                    ->route('dimension', [str_replace('?', '', $qs)])
+                    ->with('success-message', "{$c} dimensions are created.");
             }
 
             // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
             return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('error-message', 'Cannot create new accounts.');
+                    ->route('dimension', [str_replace('?', '', $qs)])
+                    ->with('error-message', 'Cannot create new dimensions.');
         }
         
     }

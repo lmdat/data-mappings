@@ -14,7 +14,7 @@
 
 <div class="row">
     <div class="col-md-7">
-        @include('Backend::account.list-account', ['entries' => $entries, 'qs' => $qs])
+        {{--  @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs])  --}}
     </div>
 
     <div class="col-md-5">

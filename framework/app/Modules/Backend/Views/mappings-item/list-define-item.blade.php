@@ -17,8 +17,7 @@
                             <th>Code</th>
                             <th>Item Name</th>
                             <th>Type</th>
-                            <th>Account</th>
-                            <th></th>
+                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,20 +27,10 @@
                             <td>{!! $item->tmp_name !!}</td>
                             <td>{{ $item->mappings_type->type_name }}</td>
                             <td>
-                            <?php
-                                $accounts = $item->accounts()->orderBy('account_code', 'DESC')->get();
-                                $n = count($accounts);                                
-                            ?>
-                            @for($i=0; $i<$n; $i++)
-                                <small>{{$accounts[$i]->account_code}}</small>&nbsp;
-                                @if($i % $n == 2) <br/> @endif
-                            @endfor
-                            </td>
-                            <td>
                                 <a href="{{ route('mappings-item-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
-                            @if($item->is_leaf == 1)
+                            {{--  @if($item->is_leaf == 1)
                                 <a href="{{ route('account-mount', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-info" role="button"><i class="fa fa-link"></i>Mount</a>
-                            @endif
+                            @endif  --}}
                             </td>
                         </tr>
                         @endforeach

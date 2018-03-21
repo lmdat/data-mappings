@@ -16,6 +16,7 @@ class MappingsItem extends Model{
         'extra_attribute',
         'type_id',
         'is_leaf',
+        'company_id',
         'status'
     ];
 
@@ -35,9 +36,18 @@ class MappingsItem extends Model{
         return $this->belongsTo('App\Models\MappingsType', 'type_id');
     }
 
-    public function accounts(){
-        return $this->belongsToMany('App\Models\AccountData', 'account_item', 'mappings_code', 'account_code', null, 'account_code');
+    // public function accounts(){
+    //     return $this->belongsToMany('App\Models\AccountData', 'account_item', 'mappings_code', 'account_code', null, 'account_code');
+    // }
+
+    public function ledgers(){
+        return $this->belongsToMany('App\Models\Ledger', 'ledger_item', 'mappings_code', 'ledger_code', null, 'ledger_code');
     }
+
+    public function company(){
+        return $this->belongsTo('App\Models\Company', 'company_id');
+    }
+
 
     /*----- BACKEND FUNCTION -----*/
     public static function getRootParentList(){

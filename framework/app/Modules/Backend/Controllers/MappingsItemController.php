@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use App\Libs\Utils\Vii;
 use App\Models\MappingsType;
 use App\Models\MappingsItem;
-use App\Models\AccountData;
+use App\Models\Account;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -216,7 +216,7 @@ class MappingsItemController extends Controller{
         $item = MappingsItem::findOrFail($id);
 
         // Account List
-        $accounts = AccountData::all();
+        $accounts = Account::all();
 
         //dd($accounts);
 

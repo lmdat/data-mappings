@@ -27,7 +27,7 @@ Route::group([
 
         Route::match(['get', 'post'], '/mount/{id?}', ['uses' => 'MappingsItemController@getMountAccount'])->name('account-mount');
 
-        Route::post('/mount/{id?}', ['uses' => 'MappingsItemController@postMountAccountItem'])->name('account-post-mount');
+        // Route::post('/mount/{id?}', ['uses' => 'MappingsItemController@postMountAccountItem'])->name('account-post-mount');
         // Route::post('/ordering', ['uses' => 'CategoryController@postOrderingCategory']);
 
         // Route::get('/published/{id}', ['uses' => 'CategoryController@getPublishedCategory']);
@@ -50,6 +50,28 @@ Route::group([
         Route::post('/create', ['uses' => 'AccountController@postCreateAccount'])->name('account-post-create');
  
         Route::put('/edit/{id}', ['uses' => 'AccountController@putEditAccount'])->name('account-put-edit');
+
+        
+
+
+    });
+
+    // Dimension
+    Route::group(
+        [
+            'prefix' => 'dimension',
+            //'middleware' => ['admin_permission'],
+            //'roles' => [700]
+        ], function(){
+
+        
+        Route::match(['get', 'post'], '/', ['uses' => 'DimensionController@getDimension'])->name('dimension');
+
+        Route::match(['get', 'post'], 'edit/{id?}', ['uses' => 'DimensionController@getDimension'])->name('dimension-edit');
+
+        Route::post('/create', ['uses' => 'DimensionController@postCreateDimension'])->name('dimension-post-create');
+ 
+        Route::put('/edit/{id}', ['uses' => 'DimensionController@putEditDimension'])->name('dimension-put-edit');
 
         
 
