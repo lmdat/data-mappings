@@ -26,7 +26,7 @@ class Dimension extends Model{
     //     return $this->belongsToMany('App\Models\Account', 'account_dimension', 'dim_id', 'account_id');
     // }
 
-    public function dim_type(){
+    public function dimension_type(){
         return $this->belongsTo('App\Models\DimensionType', 'dim_type');
     }
 

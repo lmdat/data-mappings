@@ -22,7 +22,7 @@
                 </thead>
                 <tbody>
                     @foreach($entries as $k=>$item)
-                    <tr>
+                    <tr @if($item->id == @$curr_id) class='table-primary' @endif>
                         <td>{{ $item->account_code }}</td>
                         <td>{{ $item->account_name }}</td>
                         <td>

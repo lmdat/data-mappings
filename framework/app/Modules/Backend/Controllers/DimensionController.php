@@ -35,6 +35,7 @@ class DimensionController extends Controller{
 
         $entries = Dimension::where('company_id', $com_id)
             ->select('*')
+            ->orderBy('dim_type', 'ASC')
             ->orderBy('dim_name', 'ASC')
             ->paginate($display_rows);
         
@@ -47,8 +48,8 @@ class DimensionController extends Controller{
         //dd($entries->toArray());
 
         if($id != null){
-            $account = Account::findOrFail($id);
-            // dd($account);
+            $dim = Dimension::findOrFail($id);
+            // dd($dim->toArray());
             return view(
                 'Backend::dimension.edit-dimension',
                 [
@@ -56,7 +57,7 @@ class DimensionController extends Controller{
                     'page_title' => 'Define Dimension',
                     'entries' => $entries,
                     'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                    'account' => $account,
+                    'dim' => $dim,
                     'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
                     'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
                     
@@ -135,7 +136,7 @@ class DimensionController extends Controller{
                 array_shift($arr);
 
             // $arr = array_unique($arr);
-            dd($arr);
+            // dd($arr);
             $data = [];
             foreach($arr as $item){
                 $a = explode(';', $item);
@@ -169,23 +170,23 @@ class DimensionController extends Controller{
         
     }
 
-    public function putEditAccount(Request $request, $id=null){
+    public function putEditDimension(Request $request, $id=null){
         $id = $request->post('id');
 
-        $form = $request->only(['account_code', 'account_name']);
+        $form = $request->only(['dim_code', 'dim_name', 'company_id', 'dim_type']);
         
-        $account = Account::findOrFail($id);
+        $dim = Dimension::findOrFail($id);
 
         $qs = Vii::queryStringBuilder($request->getQueryString());
-        if($account->update($form)){
+        if($dim->update($form)){
             return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('success-message', "Account[with code={$account->account_code}] is updated.");
+                    ->route('dimension', [str_replace('?', '', $qs)])
+                    ->with('success-message', "Dimension[with code={$dim->dim_code}] is updated.");
         }
 
         return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('error-message', "Cannot update account[with code={$account->account_code}].");
+                    ->route('dimension', [str_replace('?', '', $qs)])
+                    ->with('error-message', "Cannot update dimension[with code={$dim->dim_code}].");
     }
 
     // public function welcome(){

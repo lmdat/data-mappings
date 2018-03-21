@@ -7,14 +7,14 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Define Mappings Item</h1>
-        <p>Import data of item from excel or csv file</p>
+        <h1><i class="fa fa-location-arrow"></i> Define Account</h1>
+        <p>Import data of Account</p>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-7">
-        @include('Backend::account.list-account', ['entries' => $entries, 'qs' => $qs])
+        @include('Backend::account.list-account', ['entries' => $entries, 'qs' => $qs, 'curr_id' => $account->id])
     </div>
 
     <div class="col-md-5">

@@ -1,7 +1,7 @@
     
     <div class="tile">
         <h4 class="tile-title">
-            Account List
+            Dimension List
             @if(session()->has('error-message'))
                 <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
             @endif
@@ -15,16 +15,18 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>Code</th>
-                        <th>Account Name</th>
+                        <th>Dimension Name</th>
+                        <th>Type</th>
                         <th>Status</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($entries as $k=>$item)
-                    <tr>
-                        <td>{{ $item->account_code }}</td>
-                        <td>{{ $item->account_name }}</td>
+                    <tr @if($item->id == @$curr_id) class='table-primary' @endif>
+                        <td>{{ $item->dim_code }}</td>
+                        <td>{{ $item->dim_name }}</td>
+                        <td>{{ $item->dimension_type->type_name }}</td>
                         <td>
                         @if($item->status == 1)
                             {{--  <span class="badge badge-info">On</span>  --}}
@@ -35,7 +37,7 @@
                         @endif
                         </td>
                         <td>
-                        <a href="{{ route('account-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
+                        <a href="{{ route('dimension-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
                         
                             
                         </td>

@@ -7,14 +7,14 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Define Account</h1>
-        <p>Import data of Account</p>
+        <h1><i class="fa fa-location-arrow"></i> Define Dimension</h1>
+        <p>Import data of Dimension</p>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-7">
-        {{--  @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs])  --}}
+        @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs])
     </div>
 
     <div class="col-md-5">
