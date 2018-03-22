@@ -78,6 +78,26 @@ Route::group([
 
     });
 
+    // Ledger
+    Route::group(
+        [
+            'prefix' => 'ledger',
+            //'middleware' => ['admin_permission'],
+            //'roles' => [700]
+        ], function(){
+
+        
+        Route::match(['get', 'post'], '/', ['uses' => 'LedgerController@getDimension'])->name('dimension');
+
+        Route::get('/import/{step?}', ['uses' => 'LedgerController@getImportLedger'])->name('import-ledger');
+
+        Route::post('/import', ['uses' => 'LedgerController@postImportLedger'])->name('ledger-post-import');
+
+       
+
+
+    });
+
     
 
     Route::get('setting/dimension', ['uses' => 'SettingController@getDimension']);

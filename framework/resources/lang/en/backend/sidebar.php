@@ -8,6 +8,10 @@ return [
     'dimension' => 'Dimension',
         'define_dimension' => 'Define Dimension',
 
+    'ledger' => 'Ledger Data',
+        'list_ledgers' => 'List Ledgers',
+        'import_ledger' => 'Import Ledger',
+
     'mappings_item' => 'Mappings Item',
         'define_mappings_item' => 'Define Item',
         'item_attribute' => 'Item Attribute',

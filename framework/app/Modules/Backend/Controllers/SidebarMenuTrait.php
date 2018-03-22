@@ -247,6 +247,36 @@ trait SidebarMenuTrait{
                 ]
             ],
 
+            [
+                'id' => '',
+                'text' => trans($lang_mod . '.ledger'),
+                'url' => '#',
+                'params' => [],
+                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
+                'children' => [
+                    [
+                        'id' => '71',
+                        'text' => trans($lang_mod . '.list_ledgers'),
+                        'url' => 'ledger',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
+                    [
+                        'id' => '71',
+                        'text' => trans($lang_mod . '.import_ledger'),
+                        'url' => 'ledger/import',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
+
+                ]
+            ],
+
             // [
             //     'id' => '',
             //     'text' => 'Settings',
