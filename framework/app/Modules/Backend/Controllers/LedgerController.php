@@ -232,7 +232,7 @@ class LedgerController extends Controller{
                 }
                 else{   // .csv
                     $headers = $this->getHeaderColunmFromCsv($request, $ufile);
-                    dd($headers);
+                    // dd($headers);
                 }
             }
             
