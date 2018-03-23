@@ -20,7 +20,29 @@
                 Step 2/2 <small class="text-muted">Mapping Column to Data Field</small>
             </h4>    
             <div class="tile-body">
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <label class="control-label">Fields</label>                       
+                    </div>
 
+                    <div class="col-md-3">
+                        <label class="control-label">Column Headers</label>                       
+                    </div>
+                </div>
+                @foreach($ledger_fields as $k => $v)
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        {!! Form::text('field_text', $v, ['id'=>'field_text', 'class' => 'form-control', 'readonly' => true]) !!}
+                        {!! Form::hidden('field_name[]', $k) !!}
+                    </div>
+
+                    <div class="col-md-3">
+                        {!! Form::select('ledger_header[]', $ledger_headers, '', ['class' => 'form-control', 'id' => 'ledger_header']) !!}
+                    </div>
+                </div>
+                @endforeach
+
+             
             </div>
             <div class="tile-footer text-right">
                 <a href="{{ route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]) }}" class="btn btn-danger" role="button"><i class="fa fa-angle-double-left"></i>Previous</a>

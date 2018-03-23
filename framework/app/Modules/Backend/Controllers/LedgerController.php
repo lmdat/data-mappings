@@ -206,6 +206,30 @@ class LedgerController extends Controller{
                 ]
             );
         }
+        else{
+            $ledger_fields = [
+                'account_code' => 'Account Code',
+                'ledger_code' => 'Ledger Code',
+                'base_amount' => 'Base Amount',
+                'account_period' => 'Account Period'
+            ];
+
+            $ledger_headers = $request->session()->get('ledger_headers');
+
+            return view(
+                'Backend::ledger.import-ledger-' . $step,
+                [
+                    'form_uri' => route('ledger-post-import'),
+                    'page_title' => 'Import Ledger - Step ' . $step,
+                    'step' => $step,
+                    'ledger_headers' => $request->session()->get('ledger_headers'),
+                    'ledger_fields' => $ledger_fields,
+                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                                    
+                    //'user' => session()->get('test-name', $full_name)
+                ]
+            );
+        }
 
     }
 
@@ -233,8 +257,15 @@ class LedgerController extends Controller{
                 else{   // .csv
                     $headers = $this->getHeaderColunmFromCsv($request, $ufile);
                     // dd($headers);
+                    $request->session()->put('ledger_headers', $headers);
+
                 }
             }
+
+            $qs = Vii::queryStringBuilder($request->getQueryString());
+
+            return redirect()
+                    ->route('import-ledger', ['step' => 2, str_replace('?', '', $qs)]);
             
             // $arr = file($ufile->path());
             // if($request->post('skip_first_line') != null)
@@ -257,10 +288,9 @@ class LedgerController extends Controller{
         }
 
         $rs = [];
-        $items = explode(';', $first_line);
-        if(count($items) == 0){
-            $items = explode(',', $first_line);
-        }
+        $items = explode(",", str_replace(";", ",", $first_line));
+        // dd($items);
+       
         foreach($items as $item){
             $rs [] = trim($item);
         }
