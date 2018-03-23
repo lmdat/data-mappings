@@ -17,21 +17,27 @@
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'importForm', 'id' => 'importForm', 'role' => 'form', 'files' => true]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Step 1/3 <small class="text-muted">Select the excel/csv file</small>
+                Step 3/3 <small class="text-muted">Finish</small>
             </h4>    
             <div class="tile-body">
-                <div class="form-group">
-                    <label class="control-label">Data File(xlsx)</label>
-                    {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
-                </div>  
-                <div class="animated-checkbox">
-                    <label>
-                        {!! Form::checkbox('skip_first_line', '1', false, ['id' => 'chk_skip']) !!}<span class="label-text">Skip first line for headers?</span>
-                    </label>
-                </div>         
+                @if(session()->has('error-message'))
+                    <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
+                @endif
+
+                @if(session()->has('success-message'))
+                    <small><label class="badge badge-success">Yeah! {{ session()->get('success-message') }}</label></small>
+                @endif      
             </div>
-            <div class="tile-footer text-right">
-                    <button class="btn btn-primary" type="submit">Next <i class="fa fa-angle-double-right"></i></button>
+            <div class="tile-footer text-center">
+                @if(session()->has('error-message'))
+                    <button class="btn btn-warning" type="submit">Try Again! <i class="fa fa-angle-double-right"></i></button>
+                    {!! Form::hidden('try_again', 1) !!} 
+                @endif
+
+                @if(session()->has('success-message'))
+                    <button class="btn btn-primary" type="submit">Go back Ledger List</button>
+                @endif   
+                
             </div>
         </div>
             {!! Form::hidden('step', $step) !!} 

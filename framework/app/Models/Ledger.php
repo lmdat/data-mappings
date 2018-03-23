@@ -12,15 +12,16 @@ class Ledger extends Model{
     protected $fillable = [
         'company_id',
         'account_code',
-        'ledger_code',
-        'based_amount',
+        'ledger_key',
+        'base_amount',
         'accounting_period',
         'year',
         'month',
         'quarter_number',
         'extra_attr',
         'dim_code_list',
-        'dim_type_order'
+        'dim_type_order',
+        'created_at'
     ];
 
     protected $guarded = [

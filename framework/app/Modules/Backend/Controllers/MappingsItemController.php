@@ -24,7 +24,6 @@ class MappingsItemController extends Controller{
 
     public function getItem(Request $request, $id=null){
   
-       
         $aqs = $request->except('page'); 
         // unset($aqs['page']);
         

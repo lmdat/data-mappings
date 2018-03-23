@@ -7,10 +7,14 @@ use App\Libs\Utils\Vii;
 use App\Models\Dimension;
 use App\Models\DimensionType;
 use App\Models\Company;
-use Illuminate\Support\Facades\Session;
+use App\Models\Account;
+use App\Models\Ledger;
+
 
 class LedgerController extends Controller{
     const LANG_NAME = 'ledger';
+
+    private $company_id;
 
     public function __construct(){
         parent::__construct();
@@ -20,7 +24,7 @@ class LedgerController extends Controller{
         $actions = request()->route()->getAction();
         $this->prefixUrl = $actions['prefix'];
 
-
+        $this->company_id = 1;
     }
 
     public function getDimension(Request $request, $id=null){
@@ -206,11 +210,11 @@ class LedgerController extends Controller{
                 ]
             );
         }
-        else{
+        else if($step == 2){
 
             $ledger_fields = [
                 'account_code' => 'Account Code',
-                'ledger_code' => 'Ledger Code',
+                'ledger_key' => 'Ledger Key',
                 'base_amount' => 'Base Amount',
                 'accounting_period' => 'Accounting Period'
             ];
@@ -225,7 +229,13 @@ class LedgerController extends Controller{
                 $ledger_headers[] = $headers[$i];
             }
 
+            $skip_headers = 0;
+            if($request->session()->has('skip_headers')){
+                $skip_headers = $request->session()->get('skip_headers', 0);
+                $request->session()->forget('skip_headers');
+            }
             
+
                         
             return view(
                 'Backend::ledger.import-ledger-' . $step,
@@ -237,8 +247,20 @@ class LedgerController extends Controller{
                     'ledger_fields' => $ledger_fields,
                     'dim_types' => $dim_types,
                     'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                    'skip_headers' => $skip_headers
                                     
                     //'user' => session()->get('test-name', $full_name)
+                ]
+            );
+        }
+        else{
+            return view(
+                'Backend::ledger.import-ledger-' . $step,
+                [
+                    'form_uri' => route('ledger-post-import'),
+                    'page_title' => 'Import Ledger - Step ' . $step,
+                    'step' => $step,
+                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
                 ]
             );
         }
@@ -251,17 +273,23 @@ class LedgerController extends Controller{
         if($step == 1){
 
             $ufile = $request->file('data_file');
-            //dd($ufile->getClientMimeType());
+            $ext = $this->getTrueFileExtension($ufile);
+            
+            // dd($ufile->getClientOriginalExtension());
 
-            $reader = $this->createReader($ufile);
+            $reader = $this->createReader($ext);
 
             if($reader != null){
                 $spreadsheet = $reader->load($ufile->path());
                 $headers = $this->getHeaderColunm($request, $spreadsheet);
                 
+                $tmp = '.' . $ext;
+                $file_name = str_replace($tmp, '', $ufile->getClientOriginalName()) . '_' . time() . $tmp;
+                $file_path = $ufile->storeAs('upload', $file_name);
+    
+                $request->session()->put('file_info', ['file_path' => $file_path, 'ext' => $ext]);
                 $request->session()->put('ledger_headers', $headers);
-                $request->session()->put('obj_reader', $reader);
-                $request->session()->put('file_path', $ufile->path());
+                $request->session()->put('skip_headers', $request->post('skip_first_line', 0));
             }
 
 
@@ -274,9 +302,9 @@ class LedgerController extends Controller{
             // if($request->post('skip_first_line') != null)
             //     array_shift($arr);
         }
-        else{
+        else if($step == 2){
 
-            // dd($request->session()->get('obj_reader'));
+            // dd($request->session()->get('file_info'));
             // dd($request->all());
             $ledger_field = $request->post('field_name');
             $ledger_header = $request->post('ledger_header');
@@ -287,35 +315,72 @@ class LedgerController extends Controller{
             $ledgers = array_combine($ledger_field, $ledger_header);
             $dims = array_combine($dim_type_id, $dim_header);
 
-            $reader = $request->session()->get('obj_reader');
-            dd($request->session()->get('file_path'));
-            // $spreadsheet = $reader->load(session()->get('file_path'));
-            // $this->insertNewAccount($request, $spreadsheet, $ledgers);
+
+            $file_info = $request->session()->get('file_info');
+                        
+            $reader = $this->createReader($file_info['ext']);
+            $spreadsheet = $reader->load(storage_path('app/' . $file_info['file_path']));
+
+            $is_csv = ($file_info['ext'] == 'csv') ? true : false;
+
+            $rs = $this->insertLedgerKey($request, $spreadsheet, $ledgers, $dims, $is_csv);
+
+            $qs = Vii::queryStringBuilder($request->getQueryString());
+
+            if($rs === false){
+                return redirect()
+                    ->route('import-ledger', ['step' => 3, str_replace('?', '', $qs)])
+                    ->with('error-message', 'Cannot import ledger data from file. Some errors are occurred!');
+            }
+
+            $request->session()->put('insert_result', $rs);
+            
+            return redirect()
+                    ->route('import-ledger', ['step' => 3, str_replace('?', '', $qs)])
+                    ->with('success-message', 'Import ledger data from file successfully.');
+        }
+        else{
+            $request->session()->forget('insert_result');
+            $request->session()->forget('file_info');
+            $request->session()->forget('ledger_headers');
+            $request->session()->forget('skip_headers');
         }
     }
 
-    private function createReader($ufile){
+    private function getTrueFileExtension($ufile){
         $mime = [
             'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'xsl' => 'application/vnd.ms-excel',
+            'xls' => 'application/vnd.ms-excel',
             'csv' => 'application/vnd.ms-excel'
         ];
 
-
-        $reader = null;
+        $ext = null;
         if($ufile->getClientMimeType() == $mime['xlsx']){   // .xlsx
-            // dd('xlsx');
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+            $ext = 'xlsx';
         }
         else{
-            if($ufile->getClientOriginalExtension() == 'xls'){    // .xls
-                // dd('xls');
-                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+            if($ufile->getClientOriginalExtension() == $mime['xls']){    // .xls
+                $ext = 'xls';
             }
             else{   // .csv
-                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-
+                $ext = 'csv';
             }
+        }
+        return $ext;
+    }
+
+    private function createReader($ext){
+       
+        $reader = null;
+       
+        if($ext == 'xlsx'){   // .xlsx
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        }
+        else if($ext == 'xls'){
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        }
+        else{
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
         }
 
         return $reader;
@@ -362,25 +427,161 @@ class LedgerController extends Controller{
         return $rs;
     }
 
-    private function insertNewAccount($request, $spreadsheet, $ledgers){
+    private function insertLedgerKey($request, $spreadsheet, $ledgers, $dims, $is_csv=false){
         $worksheet = $spreadsheet->getActiveSheet();
         $highestRow = $worksheet->getHighestRow(); // e.g. 10
         $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
         $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
 
-        $acc_code_col = $ledgers['account_code'];
-        $acc_name_col = $acc_code_col + 1;
+       
+        $acc_entries = Account::where('company_id', $this->company_id)->get(['account_code']);
 
         $accounts = [];
-        for($row=1; $row<=$highestColumnIndex; $row++){
-            if($row == 1 && $request->post('skip_first_line') != null)
-                continue;
-            $accounts[$worksheet->getCellByColumnAndRow($acc_code_col, $row)->getValue()] = $worksheet->getCellByColumnAndRow($acc_name_col, $row)->getValue();
+        if($acc_entries != null){
+            foreach($acc_entries as $v){
+                $accounts[] = $v->account_code;
+            }
         }
-        dd($accounts);
+
+        $dim_entries = Dimension::where('company_id', $this->company_id)->get(['dim_code']);
+        $dimensions = [];
+        if($dim_entries != null){
+            foreach($dim_entries as $v){
+                $dimensions[] = $v->dim_code;
+            }
+        }
+
+        // dd($dimensions);
+        
+        $acc_data = [];
+        $dim_data = [];
+        $ledger_data = [];
+        for($row=1; $row<=$highestRow; $row++){
+            if($row == 1 && $request->post('skip_headers') != null)
+                continue;
+            
+            // For Account
+            $key = trim($worksheet->getCellByColumnAndRow($ledgers['account_code'], $row)->getValue());
+
+            if($key != "" && !in_array($key, $accounts)){
+
+                $val = trim($worksheet->getCellByColumnAndRow($ledgers['account_code'] + 1, $row)->getValue());
+                $acc_data[$key] = [
+                    'account_code' => $key,
+                    'account_name' => $val,
+                    'status' => 1,
+                    'company_id' => $this->company_id
+                ];
+            }
+            
+            // For Dimension
+            foreach($dims as $type_id => $v){
+                if($v > 0){
+                    $dim_code_col = $v;
+                    $dim_name_col = $v + 1;
+                    $key2 = trim($worksheet->getCellByColumnAndRow($dim_code_col, $row)->getValue());
+                    
+                    if($key2 != "" && !in_array($key2, $dimensions)){
+                        $val2 = trim($worksheet->getCellByColumnAndRow($dim_name_col, $row)->getValue());
+                        $dim_data[$key2] = [
+                            'dim_code' => $key2,
+                            'dim_name' => $val2,
+                            'dim_type' => $type_id,
+                            'status' => 1,
+                            'company_id' => $this->company_id
+                        ];
+                    }
+                        
+                    
+                }
+            }
+
+            // For Ledger
+            $ledger_key = str_replace(['_#BLANK#'], '', trim($worksheet->getCellByColumnAndRow($ledgers['ledger_key'], $row)->getValue()));
+            $base_amount = trim($worksheet->getCellByColumnAndRow($ledgers['base_amount'], $row)->getValue());
+            if($is_csv){
+                if($base_amount != ''){
+                    $base_amount = str_replace([',', '.'], '', $base_amount);
+                    if($base_amount[0] == '(' && $base_amount[strlen($base_amount) - 1] == ')'){
+                        $base_amount = substr($base_amount, 1, strlen($base_amount) - 2) * (-1);
+                    }
+                }
+                else{
+                    $base_amount = 0;
+                }
+            }
+
+            if($base_amount != 0)
+                $base_amount = round($base_amount * 1);
+            
+            
+            
+            $accounting_period = trim($worksheet->getCellByColumnAndRow($ledgers['accounting_period'], $row)->getValue());
+            $year = intval(substr($accounting_period, 0, 4));
+            $month = intval(substr($accounting_period, 4));
+            $ledger_data[] = [
+                'company_id' => $this->company_id,
+                'account_code' => $key,
+                'ledger_key' => $ledger_key,
+                'base_amount' => doubleval($base_amount),
+                'accounting_period' => $year . '-' . (($month < 10) ? '0'.$month : $month) . '-01',
+                'year' => $year,
+                'month' => $month,
+                'quarter_number' => $this->getQuarter($month),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+        }
+
+        // dd($acc_data, $dim_data, $ledger_data);
+        
+        $rs = [
+            'account' => 0,
+            'dim' => 0,
+            'ledger' => 0
+        ];
+
+        $b = true;
+        if(count($acc_data) > 0){
+            if(Account::insert($acc_data))
+                $rs['account'] = count($acc_data);
+            else
+                $b = $b & false;
+        }
+
+        if(count($dim_data) > 0){
+            if(Dimension::insert($dim_data))
+                $rs['dim'] = count($dim_data);
+            else
+                $b = $b & false;
+        }
+
+        if(count($ledger_data) > 0){
+            if(Ledger::insert($ledger_data))
+                $rs['ledger'] = count($ledger_data);
+            else
+                $b = $b & false;
+        }
+
+        if($b)
+            return $rs;
+
+        return $b;
     }
 
+    private function getQuarter($month){
+        if(!is_int($month))
+            $month = intval($month);
+        
+        if($month < 4)
+            return 1;
+        if($month > 3 && $month < 7)
+            return 2;
+        if($month > 6 && $month < 10)
+            return 3;
+        return 4;
+    }
 
+   
 
     // public function welcome(){
 

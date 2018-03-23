@@ -17,7 +17,7 @@
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'importForm', 'id' => 'importForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Step 2/2 <small class="text-muted">Mapping Column to Data Field</small>
+                Step 2/3 <small class="text-muted">Mapping Column to Data Field</small>
             </h4>    
             <div class="tile-body">
                 <div class="row">
@@ -75,7 +75,8 @@
                 <button class="btn btn-primary" type="submit">Save <i class="fa fa-angle-double-right"></i></button>
             </div>
         </div>
-            {!! Form::hidden('step', 2) !!}
+            {!! Form::hidden('step', $step) !!}
+            {!! Form::hidden('skip_headers', $skip_headers) !!}            
         {!! Form::close() !!}
     </div>
 </div>
