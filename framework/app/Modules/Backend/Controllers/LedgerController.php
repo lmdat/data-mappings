@@ -7,7 +7,7 @@ use App\Libs\Utils\Vii;
 use App\Models\Dimension;
 use App\Models\DimensionType;
 use App\Models\Company;
-
+use Illuminate\Support\Facades\Session;
 
 class LedgerController extends Controller{
     const LANG_NAME = 'ledger';
@@ -192,7 +192,7 @@ class LedgerController extends Controller{
     public function getImportLedger(Request $request, $step=1){
         
         //dd( Vii::queryStringBuilder($request->getQueryString()));
-
+        
         if($step == 1){
             return view(
                 'Backend::ledger.import-ledger-' . $step,
@@ -207,23 +207,35 @@ class LedgerController extends Controller{
             );
         }
         else{
+
             $ledger_fields = [
                 'account_code' => 'Account Code',
                 'ledger_code' => 'Ledger Code',
                 'base_amount' => 'Base Amount',
-                'account_period' => 'Account Period'
+                'accounting_period' => 'Accounting Period'
             ];
 
-            $ledger_headers = $request->session()->get('ledger_headers');
+            $dim_types = DimensionType::all(['id', 'type_name']);
+            // dd($dim_types->toArray());
 
+            $headers = $request->session()->get('ledger_headers');
+            
+            $ledger_headers[] = 'Select one...';
+            for($i=0; $i<count($headers); $i++){
+                $ledger_headers[] = $headers[$i];
+            }
+
+            
+                        
             return view(
                 'Backend::ledger.import-ledger-' . $step,
                 [
                     'form_uri' => route('ledger-post-import'),
                     'page_title' => 'Import Ledger - Step ' . $step,
                     'step' => $step,
-                    'ledger_headers' => $request->session()->get('ledger_headers'),
+                    'ledger_headers' => $ledger_headers,
                     'ledger_fields' => $ledger_fields,
+                    'dim_types' => $dim_types,
                     'qs' => Vii::queryStringBuilder($request->getQueryString()),
                                     
                     //'user' => session()->get('test-name', $full_name)
@@ -237,30 +249,21 @@ class LedgerController extends Controller{
         $step = $request->post('step');
 
         if($step == 1){
-            $mime = [
-                'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'xsl' => 'application/vnd.ms-excel',
-                'csv' => 'application/vnd.ms-excel'
-            ];
 
             $ufile = $request->file('data_file');
-            
-            // dd($ufile->guessClientExtension());
+            //dd($ufile->getClientMimeType());
 
-            if($ufile->getClientMimeType() == $mime['xlsx']){   // .xlsx
-                dd('xlsx');
-            }
-            else{
-                if($ufile->getClientOriginalExtension() == 'xls'){    // .xls
-                    dd('xls');
-                }
-                else{   // .csv
-                    $headers = $this->getHeaderColunmFromCsv($request, $ufile);
-                    // dd($headers);
-                    $request->session()->put('ledger_headers', $headers);
+            $reader = $this->createReader($ufile);
 
-                }
+            if($reader != null){
+                $spreadsheet = $reader->load($ufile->path());
+                $headers = $this->getHeaderColunm($request, $spreadsheet);
+                
+                $request->session()->put('ledger_headers', $headers);
+                $request->session()->put('obj_reader', $reader);
+                $request->session()->put('file_path', $ufile->path());
             }
+
 
             $qs = Vii::queryStringBuilder($request->getQueryString());
 
@@ -271,31 +274,110 @@ class LedgerController extends Controller{
             // if($request->post('skip_first_line') != null)
             //     array_shift($arr);
         }
+        else{
+
+            // dd($request->session()->get('obj_reader'));
+            // dd($request->all());
+            $ledger_field = $request->post('field_name');
+            $ledger_header = $request->post('ledger_header');
+
+            $dim_type_id = $request->post('dim_type_id');
+            $dim_header = $request->post('dim_header');
+
+            $ledgers = array_combine($ledger_field, $ledger_header);
+            $dims = array_combine($dim_type_id, $dim_header);
+
+            $reader = $request->session()->get('obj_reader');
+            dd($request->session()->get('file_path'));
+            // $spreadsheet = $reader->load(session()->get('file_path'));
+            // $this->insertNewAccount($request, $spreadsheet, $ledgers);
+        }
     }
 
-    private function getHeaderColunmFromExcel($request, $file){
+    private function createReader($ufile){
+        $mime = [
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'xsl' => 'application/vnd.ms-excel',
+            'csv' => 'application/vnd.ms-excel'
+        ];
 
-    }
 
-    private function getHeaderColunmFromCsv($request, $ufile){
-        $arr = file($ufile->path());
-        $first_line = '';
-        if($request->post('skip_first_line') != null){
-            $first_line = array_shift($arr);
+        $reader = null;
+        if($ufile->getClientMimeType() == $mime['xlsx']){   // .xlsx
+            // dd('xlsx');
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
         }
         else{
-            $first_line = $arr[0];
+            if($ufile->getClientOriginalExtension() == 'xls'){    // .xls
+                // dd('xls');
+                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+            }
+            else{   // .csv
+                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+
+            }
         }
 
-        $rs = [];
-        $items = explode(",", str_replace(";", ",", $first_line));
-        // dd($items);
+        return $reader;
+    }
+    
+    private function getHeaderColunm($request, $spreadsheet){
+        // $arr = file($ufile->path());
+        // $first_line = '';
+        // if($request->post('skip_first_line') != null){
+        //     $first_line = array_shift($arr);
+        // }
+        // else{
+        //     $first_line = $arr[0];
+        // }
+
+        // $rs = [];
+        // $items = explode(",", str_replace(";", ",", $first_line));
+        // // dd($items);
        
-        foreach($items as $item){
-            $rs [] = trim($item);
+        // foreach($items as $item){
+        //     $rs [] = trim($item);
+        // }
+
+        // return $rs;
+        $rs = [];
+        $worksheet = $spreadsheet->getActiveSheet();
+        $highestRow = $worksheet->getHighestRow(); // e.g. 10
+        $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        for ($col=1; $col<=$highestColumnIndex; $col++){
+            $rs[] = $worksheet->getCellByColumnAndRow($col, 1)->getValue();
         }
+
+        // for ($row = 1; $row <= $highestRow; ++$row) {
+           
+        //     // for ($col = 1; $col <= $highestColumnIndex; ++$col) {
+        //     //     $value = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
+        //     //     echo '<td>' . $value . '</td>' . PHP_EOL;
+        //     // }
+        //     $rs[] = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+        // }
 
         return $rs;
+    }
+
+    private function insertNewAccount($request, $spreadsheet, $ledgers){
+        $worksheet = $spreadsheet->getActiveSheet();
+        $highestRow = $worksheet->getHighestRow(); // e.g. 10
+        $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        $acc_code_col = $ledgers['account_code'];
+        $acc_name_col = $acc_code_col + 1;
+
+        $accounts = [];
+        for($row=1; $row<=$highestColumnIndex; $row++){
+            if($row == 1 && $request->post('skip_first_line') != null)
+                continue;
+            $accounts[$worksheet->getCellByColumnAndRow($acc_code_col, $row)->getValue()] = $worksheet->getCellByColumnAndRow($acc_name_col, $row)->getValue();
+        }
+        dd($accounts);
     }
 
 

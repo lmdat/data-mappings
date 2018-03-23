@@ -14,7 +14,7 @@ class Ledger extends Model{
         'account_code',
         'ledger_code',
         'based_amount',
-        'account_period',
+        'accounting_period',
         'year',
         'month',
         'quarter_number',

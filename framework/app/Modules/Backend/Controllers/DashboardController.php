@@ -18,7 +18,7 @@ class DashboardController extends Controller{
     public function welcome(){
 
         $full_name = 'Vincent Valentine';//$this->guard->user()->first_name . ' ' . $this->guard->user()->surname;
-        
+        session()->flush();
         return view(
             'Backend::dashboard.welcome',
             [

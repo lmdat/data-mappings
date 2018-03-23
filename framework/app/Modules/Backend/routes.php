@@ -13,6 +13,7 @@ Route::group([
         [
             'prefix' => 'mappings-item',
             //'middleware' => ['admin_permission'],
+     
             //'roles' => [700]
         ], function(){
 
@@ -39,6 +40,7 @@ Route::group([
         [
             'prefix' => 'account',
             //'middleware' => ['admin_permission'],
+     
             //'roles' => [700]
         ], function(){
 
@@ -61,6 +63,7 @@ Route::group([
         [
             'prefix' => 'dimension',
             //'middleware' => ['admin_permission'],
+      
             //'roles' => [700]
         ], function(){
 
@@ -83,6 +86,7 @@ Route::group([
         [
             'prefix' => 'ledger',
             //'middleware' => ['admin_permission'],
+            
             //'roles' => [700]
         ], function(){
 
@@ -100,7 +104,7 @@ Route::group([
 
     
 
-    Route::get('setting/dimension', ['uses' => 'SettingController@getDimension']);
+    // Route::get('setting/dimension', ['uses' => 'SettingController@getDimension']);
 
-    Route::get('setting/mappings-item', ['uses' => 'SettingController@getMappingsItem']);
+    // Route::get('setting/mappings-item', ['uses' => 'SettingController@getMappingsItem']);
 });
