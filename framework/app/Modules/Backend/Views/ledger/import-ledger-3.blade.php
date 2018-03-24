@@ -18,25 +18,32 @@
         <div class="tile">
             <h4 class="tile-title">
                 Step 3/3 <small class="text-muted">Finish</small>
-            </h4>    
-            <div class="tile-body">
+
                 @if(session()->has('error-message'))
-                    <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
+                    <label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label>
                 @endif
 
                 @if(session()->has('success-message'))
-                    <small><label class="badge badge-success">Yeah! {{ session()->get('success-message') }}</label></small>
-                @endif      
+                    <label class="badge badge-success">Yeah! {{ session()->get('success-message') }}</label>
+                @endif 
+            </h4>    
+            <div class="tile-body">
+                @if($result != null)
+               
+                <p class="h5"><span class="text-primary">{{ $result['ledger'] }}</span> ledger keys are inserted.</p>
+                <p class="h5"><span class="text-primary">{{ $result['account'] }}</span> new accounts are detected and inserted.</p>
+                <p class="h5"><span class="text-primary">{{ $result['dim'] }}</span> new dimentions are detected and inserted.</p>
+                @endif
             </div>
             <div class="tile-footer text-center">
-                @if(session()->has('error-message'))
+                @if($result != null)
+                    <button class="btn btn-primary" type="submit">Go back Ledger List</button>
+                @else
                     <button class="btn btn-warning" type="submit">Try Again! <i class="fa fa-angle-double-right"></i></button>
                     {!! Form::hidden('try_again', 1) !!} 
                 @endif
 
-                @if(session()->has('success-message'))
-                    <button class="btn btn-primary" type="submit">Go back Ledger List</button>
-                @endif   
+                   
                 
             </div>
         </div>

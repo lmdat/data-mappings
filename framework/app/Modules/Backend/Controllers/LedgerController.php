@@ -27,7 +27,7 @@ class LedgerController extends Controller{
         $this->company_id = 1;
     }
 
-    public function getDimension(Request $request, $id=null){
+    public function getLedger(Request $request, $id=null){
 
         $display_rows = $request->input('rows_per_page', 15);
 
@@ -37,17 +37,17 @@ class LedgerController extends Controller{
 
         $com_id = 1;
 
-        $entries = Dimension::where('company_id', $com_id)
-            ->select('*')
-            ->orderBy('dim_type', 'ASC')
-            ->orderBy('dim_name', 'ASC')
-            ->paginate($display_rows);
+        $entries = Ledger::where('company_id', $com_id)
+            ->select(['account_code', 'ledger_key', 'base_amount', 'accounting_period'])
+            ->orderBy('account_code', 'ASC')
+            ->orderBy('accounting_period', 'ASC')
+             ->paginate($display_rows);
         
-        $entries->withPath(route('dimension', [str_replace('?', '', $paging_qs)]));
+        $entries->withPath(route('ledger', [str_replace('?', '', $paging_qs)]));
 
-        $companies = Company::all();
+        // $companies = Company::all();
 
-        $dim_type = DimensionType::all();
+        // $dim_type = DimensionType::all();
         
         //dd($entries->toArray());
 
@@ -55,15 +55,15 @@ class LedgerController extends Controller{
             $dim = Dimension::findOrFail($id);
             // dd($dim->toArray());
             return view(
-                'Backend::dimension.edit-dimension',
+                'Backend::ledger.list-ledger',
                 [
                     'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
-                    'page_title' => 'Define Dimension',
+                    'page_title' => 'Ledger',
                     'entries' => $entries,
                     'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                    'dim' => $dim,
-                    'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
-                    'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
+                    // 'dim' => $dim,
+                    // 'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
+                    // 'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
                     
                     
                     //'user' => session()->get('test-name', $full_name)
@@ -73,17 +73,19 @@ class LedgerController extends Controller{
         }
        
         return view(
-            'Backend::dimension.add-dimension',
-            [
-                'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
-                'page_title' => 'Define Dimension',
-                'entries' => $entries,
-                'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
-                'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
-                
-                //'user' => session()->get('test-name', $full_name)
-            ]
+            'Backend::ledger.list-ledger',
+                [
+                    'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
+                    'page_title' => 'Ledger',
+                    'entries' => $entries,
+                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                    // 'dim' => $dim,
+                    // 'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
+                    // 'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
+                    
+                    
+                    //'user' => session()->get('test-name', $full_name)
+                ]
         );
     }
 
@@ -196,7 +198,8 @@ class LedgerController extends Controller{
     public function getImportLedger(Request $request, $step=1){
         
         //dd( Vii::queryStringBuilder($request->getQueryString()));
-        
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+
         if($step == 1){
             return view(
                 'Backend::ledger.import-ledger-' . $step,
@@ -204,13 +207,18 @@ class LedgerController extends Controller{
                     'form_uri' => route('ledger-post-import'),
                     'page_title' => 'Import Ledger - Step ' . $step,
                     'step' => $step,
-                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                    'qs' => $qs,
                                     
                     //'user' => session()->get('test-name', $full_name)
                 ]
             );
         }
         else if($step == 2){
+
+            if(!$request->session()->has('process_token')){
+                return redirect()
+                    ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
+            }
 
             $ledger_fields = [
                 'account_code' => 'Account Code',
@@ -246,7 +254,7 @@ class LedgerController extends Controller{
                     'ledger_headers' => $ledger_headers,
                     'ledger_fields' => $ledger_fields,
                     'dim_types' => $dim_types,
-                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                    'qs' => $qs,
                     'skip_headers' => $skip_headers
                                     
                     //'user' => session()->get('test-name', $full_name)
@@ -254,13 +262,21 @@ class LedgerController extends Controller{
             );
         }
         else{
+
+            if(!$request->session()->has('process_token')){
+                return redirect()
+                    ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
+            }
+
+           
             return view(
                 'Backend::ledger.import-ledger-' . $step,
                 [
                     'form_uri' => route('ledger-post-import'),
                     'page_title' => 'Import Ledger - Step ' . $step,
                     'step' => $step,
-                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                    'qs' => $qs,
+                    'result' => $request->session()->get('final_result', null)
                 ]
             );
         }
@@ -268,9 +284,16 @@ class LedgerController extends Controller{
     }
 
     public function postImportLedger(Request $request){
-        $step = $request->post('step');
+        $step = $request->post('step', 0);
+
+        if($step == 0){
+            return redirect()
+                    ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
+        }
 
         if($step == 1){
+
+            $qs = Vii::queryStringBuilder($request->getQueryString());
 
             $ufile = $request->file('data_file');
             $ext = $this->getTrueFileExtension($ufile);
@@ -290,11 +313,15 @@ class LedgerController extends Controller{
                 $request->session()->put('file_info', ['file_path' => $file_path, 'ext' => $ext]);
                 $request->session()->put('ledger_headers', $headers);
                 $request->session()->put('skip_headers', $request->post('skip_first_line', 0));
+
+                $request->session()->put('process_token', md5(time()));
+            }
+            else{
+                return redirect()
+                    ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
             }
 
-
-            $qs = Vii::queryStringBuilder($request->getQueryString());
-
+            
             return redirect()
                     ->route('import-ledger', ['step' => 2, str_replace('?', '', $qs)]);
             
@@ -324,7 +351,7 @@ class LedgerController extends Controller{
             $is_csv = ($file_info['ext'] == 'csv') ? true : false;
 
             $rs = $this->insertLedgerKey($request, $spreadsheet, $ledgers, $dims, $is_csv);
-
+            // dd($rs);
             $qs = Vii::queryStringBuilder($request->getQueryString());
 
             if($rs === false){
@@ -333,7 +360,7 @@ class LedgerController extends Controller{
                     ->with('error-message', 'Cannot import ledger data from file. Some errors are occurred!');
             }
 
-            $request->session()->put('insert_result', $rs);
+            $request->session()->put('final_result', $rs);
             
             return redirect()
                     ->route('import-ledger', ['step' => 3, str_replace('?', '', $qs)])
@@ -344,6 +371,9 @@ class LedgerController extends Controller{
             $request->session()->forget('file_info');
             $request->session()->forget('ledger_headers');
             $request->session()->forget('skip_headers');
+            $request->session()->forget('process_token');
+
+
         }
     }
 

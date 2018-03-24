@@ -21,7 +21,7 @@
             </h4>    
             <div class="tile-body">
                 <div class="form-group">
-                    <label class="control-label">Data File(xlsx)</label>
+                    <label class="control-label">Data File(xlsx, csv)</label>
                     {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
                 </div>  
                 <div class="animated-checkbox">

@@ -91,7 +91,7 @@ Route::group([
         ], function(){
 
         
-        Route::match(['get', 'post'], '/', ['uses' => 'LedgerController@getDimension'])->name('dimension');
+        Route::match(['get', 'post'], '/', ['uses' => 'LedgerController@getLedger'])->name('ledger');
 
         Route::get('/import/{step?}', ['uses' => 'LedgerController@getImportLedger'])->name('import-ledger');
 
