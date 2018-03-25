@@ -21,7 +21,8 @@ class Ledger extends Model{
         'extra_attr',
         'dim_code_list',
         'dim_type_order',
-        'created_at'
+        'created_at',
+        'revision'
     ];
 
     protected $guarded = [
@@ -30,6 +31,10 @@ class Ledger extends Model{
 
     public function items(){
         return $this->belongsToMany('App\Models\MappingsItem', 'ledger_item', 'ledger_code', 'mapping_code', 'ledger_code');
+    }
+
+    public function upload_revision(){
+        return $this->belongsTo('App\Models\UploadRevision', 'revision');
     }
 
 }

@@ -9,6 +9,8 @@ use App\Models\DimensionType;
 use App\Models\Company;
 use App\Models\Account;
 use App\Models\Ledger;
+use App\Models\UploadLedger;
+use App\Models\UploadRevision;
 
 
 class LedgerController extends Controller{
@@ -41,7 +43,7 @@ class LedgerController extends Controller{
             ->select(['account_code', 'ledger_key', 'base_amount', 'accounting_period'])
             ->orderBy('account_code', 'ASC')
             ->orderBy('accounting_period', 'ASC')
-             ->paginate($display_rows);
+            ->paginate($display_rows);
         
         $entries->withPath(route('ledger', [str_replace('?', '', $paging_qs)]));
 
@@ -51,26 +53,26 @@ class LedgerController extends Controller{
         
         //dd($entries->toArray());
 
-        if($id != null){
-            $dim = Dimension::findOrFail($id);
-            // dd($dim->toArray());
-            return view(
-                'Backend::ledger.list-ledger',
-                [
-                    'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
-                    'page_title' => 'Ledger',
-                    'entries' => $entries,
-                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                    // 'dim' => $dim,
-                    // 'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
-                    // 'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
+        // if($id != null){
+        //     $dim = Dimension::findOrFail($id);
+        //     // dd($dim->toArray());
+        //     return view(
+        //         'Backend::ledger.list-ledger',
+        //         [
+        //             'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
+        //             'page_title' => 'Ledger',
+        //             'entries' => $entries,
+        //             'qs' => Vii::queryStringBuilder($request->getQueryString()),
+        //             // 'dim' => $dim,
+        //             // 'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
+        //             // 'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
                     
                     
-                    //'user' => session()->get('test-name', $full_name)
-                ]
-            );
+        //             //'user' => session()->get('test-name', $full_name)
+        //         ]
+        //     );
 
-        }
+        // }
        
         return view(
             'Backend::ledger.list-ledger',
@@ -201,6 +203,26 @@ class LedgerController extends Controller{
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
         if($step == 1){
+            $entries = UploadLedger::where('company_id', $this->company_id)
+                ->orderBy('created_at', 'DESC')
+                ->get(['id', 'upload_title']);
+            
+            $upload_ledgers = [];
+            foreach($entries as $entry){
+                $tmp = $entry;
+                $total_revision = $entry->upload_revisions()->count();
+                if($total_revision == 1){
+                    $tmp->upload_title = $tmp->upload_title . ' (Has ' . $total_revision . ' Revision)';
+                }                    
+                else if($total_revision > 1){
+                    $tmp->upload_title = $tmp->upload_title . ' (Has ' . $total_revision . ' Revisions)';
+                }
+
+                $upload_ledgers[] =  $tmp->toArray();
+            }
+
+            // dd($upload_ledgers);
+
             return view(
                 'Backend::ledger.import-ledger-' . $step,
                 [
@@ -208,7 +230,7 @@ class LedgerController extends Controller{
                     'page_title' => 'Import Ledger - Step ' . $step,
                     'step' => $step,
                     'qs' => $qs,
-                                    
+                    'upload_ledgers' => Vii::createOptionData($upload_ledgers, 'id', ['upload_title'], false)                                    
                     //'user' => session()->get('test-name', $full_name)
                 ]
             );
@@ -219,6 +241,7 @@ class LedgerController extends Controller{
                 return redirect()
                     ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
             }
+
 
             $ledger_fields = [
                 'account_code' => 'Account Code',
@@ -268,7 +291,16 @@ class LedgerController extends Controller{
                     ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
             }
 
-           
+            $result = $request->session()->get('final_result', null);
+
+            // Delete all session of these step
+            $request->session()->forget('insert_result');
+            $request->session()->forget('file_info');
+            $request->session()->forget('ledger_headers');
+            $request->session()->forget('skip_headers');
+            $request->session()->forget('process_token');
+            $request->session()->forget('upload_revision');
+
             return view(
                 'Backend::ledger.import-ledger-' . $step,
                 [
@@ -291,9 +323,11 @@ class LedgerController extends Controller{
                     ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
         }
 
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+
         if($step == 1){
 
-            $qs = Vii::queryStringBuilder($request->getQueryString());
+            $upload_revision = $request->only(['upload_type', 'upload_title', 'upload_id']);
 
             $ufile = $request->file('data_file');
             $ext = $this->getTrueFileExtension($ufile);
@@ -302,32 +336,30 @@ class LedgerController extends Controller{
 
             $reader = $this->createReader($ext);
 
-            if($reader != null){
-                $spreadsheet = $reader->load($ufile->path());
-                $headers = $this->getHeaderColunm($request, $spreadsheet);
-                
-                $tmp = '.' . $ext;
-                $file_name = str_replace($tmp, '', $ufile->getClientOriginalName()) . '_' . time() . $tmp;
-                $file_path = $ufile->storeAs('upload', $file_name);
-    
-                $request->session()->put('file_info', ['file_path' => $file_path, 'ext' => $ext]);
-                $request->session()->put('ledger_headers', $headers);
-                $request->session()->put('skip_headers', $request->post('skip_first_line', 0));
-
-                $request->session()->put('process_token', md5(time()));
-            }
-            else{
+            if($reader == null){
                 return redirect()
                     ->route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]);
             }
 
+            $spreadsheet = $reader->load($ufile->path());
+            $headers = $this->getHeaderColunm($request, $spreadsheet);
             
+            $tmp = '.' . $ext;
+            $file_name = str_replace($tmp, '', $ufile->getClientOriginalName()) . '_' . time() . $tmp;
+            $file_path = $ufile->storeAs('upload', $file_name);
+
+            $request->session()->put('file_info', ['file_path' => $file_path, 'ext' => $ext]);
+            $request->session()->put('ledger_headers', $headers);
+            $request->session()->put('skip_headers', $request->post('skip_first_line', 0));
+
+            $request->session()->put('process_token', md5(time()));
+
+            $request->session()->put('upload_revision', $upload_revision);
+
             return redirect()
                     ->route('import-ledger', ['step' => 2, str_replace('?', '', $qs)]);
             
-            // $arr = file($ufile->path());
-            // if($request->post('skip_first_line') != null)
-            //     array_shift($arr);
+            
         }
         else if($step == 2){
 
@@ -352,8 +384,7 @@ class LedgerController extends Controller{
 
             $rs = $this->insertLedgerKey($request, $spreadsheet, $ledgers, $dims, $is_csv);
             // dd($rs);
-            $qs = Vii::queryStringBuilder($request->getQueryString());
-
+            
             if($rs === false){
                 return redirect()
                     ->route('import-ledger', ['step' => 3, str_replace('?', '', $qs)])
@@ -366,15 +397,18 @@ class LedgerController extends Controller{
                     ->route('import-ledger', ['step' => 3, str_replace('?', '', $qs)])
                     ->with('success-message', 'Import ledger data from file successfully.');
         }
-        else{
-            $request->session()->forget('insert_result');
-            $request->session()->forget('file_info');
-            $request->session()->forget('ledger_headers');
-            $request->session()->forget('skip_headers');
-            $request->session()->forget('process_token');
+        // else{
+        //     $request->session()->forget('final_result');
+        //     $request->session()->forget('file_info');
+        //     $request->session()->forget('ledger_headers');
+        //     $request->session()->forget('skip_headers');
+        //     $request->session()->forget('process_token');
+        //     $request->session()->forget('upload_revision');
 
 
-        }
+        //     return redirect()
+        //             ->route('ledger', [str_replace('?', '', $qs)]);
+        // }
     }
 
     private function getTrueFileExtension($ufile){
@@ -486,6 +520,8 @@ class LedgerController extends Controller{
         $acc_data = [];
         $dim_data = [];
         $ledger_data = [];
+        $revision_id = $this->createRevision();
+
         for($row=1; $row<=$highestRow; $row++){
             if($row == 1 && $request->post('skip_headers') != null)
                 continue;
@@ -535,20 +571,23 @@ class LedgerController extends Controller{
                     if($base_amount[0] == '(' && $base_amount[strlen($base_amount) - 1] == ')'){
                         $base_amount = substr($base_amount, 1, strlen($base_amount) - 2) * (-1);
                     }
+                    else{
+                        $base_amount = $base_amount * 1;
+                    }
                 }
                 else{
                     $base_amount = 0;
                 }
             }
 
-            if($base_amount != 0)
-                $base_amount = round($base_amount * 1);
-            
-            
+            if($base_amount != 0){
+                $base_amount = round($base_amount);            
+            }
             
             $accounting_period = trim($worksheet->getCellByColumnAndRow($ledgers['accounting_period'], $row)->getValue());
             $year = intval(substr($accounting_period, 0, 4));
             $month = intval(substr($accounting_period, 4));
+           
             $ledger_data[] = [
                 'company_id' => $this->company_id,
                 'account_code' => $key,
@@ -558,7 +597,8 @@ class LedgerController extends Controller{
                 'year' => $year,
                 'month' => $month,
                 'quarter_number' => $this->getQuarter($month),
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s'),
+                'revision' => $revision_id
             ];
         }
 
@@ -570,32 +610,92 @@ class LedgerController extends Controller{
             'ledger' => 0
         ];
 
-        $b = true;
+        $done = true;
+
         if(count($acc_data) > 0){
-            if(Account::insert($acc_data))
+            $a = true;
+            foreach( collect($acc_data)->chunk(100) as $subset){
+                $a = $a & Account::insert($subset->toArray());
+            }
+
+            if($a){
                 $rs['account'] = count($acc_data);
-            else
-                $b = $b & false;
+            }
+            
+            $done = $done & $a;            
         }
 
         if(count($dim_data) > 0){
-            if(Dimension::insert($dim_data))
+            $b = true;
+            
+            foreach(collect($dim_data)->chunk(100) as $subset){
+                $b = $b & Dimension::insert($subset->toArray());
+            }
+
+            if($b){
                 $rs['dim'] = count($dim_data);
-            else
-                $b = $b & false;
+            }
+            
+            $done = $done & $b;
         }
 
         if(count($ledger_data) > 0){
-            if(Ledger::insert($ledger_data))
+
+            $c = true;
+            
+            foreach(collect($ledger_data)->chunk(1000) as $subset){
+                $c = $c & Ledger::insert($subset->toArray());
+            }
+           
+            if($c){
                 $rs['ledger'] = count($ledger_data);
-            else
-                $b = $b & false;
+            }
+
+            $done = $done & $c;    
+            
         }
 
-        if($b)
-            return $rs;
+        if($done)   return $rs;
 
-        return $b;
+        return $done;
+    }
+
+    private function createRevision(){
+        // Create Revision
+        $upload_revision = session()->get('upload_revision');
+        $upload_ledger = null;
+
+        if(intval($upload_revision['upload_type']) == 1){
+            $created_at =  date('Y-m-d H:i');
+            $data = [
+                'company_id' => $this->company_id,
+                'upload_title' => $upload_revision['upload_title'] . ' (' . $created_at .')',
+                'created_at' => $created_at,
+                'salt_key' => md5(time()),
+                'status' => 1
+            ];
+            $upload_ledger = UploadLedger::create($data);
+        }
+
+        if($upload_ledger == null)
+            $upload_ledger = UploadLedger::findOrFail(intval($upload_revision['upload_id']));
+        
+        $count = UploadRevision::where('upload_id', $upload_ledger->id)
+            ->where('company_id', $this->company_id)
+            ->count();
+
+        $data = [
+            'id' => uniqid($this->company_id . $upload_ledger->id),
+            'upload_id' => $upload_ledger->id,
+            'company_id' => $this->company_id,
+            'created_at' => date('Y-m-d H:i:s'),
+            'status' => 1,
+            'revision_number' => $count + 1
+        ];
+        
+        $upload_revision = UploadRevision::create($data);
+
+        return $upload_revision->id;
     }
 
     private function getQuarter($month){

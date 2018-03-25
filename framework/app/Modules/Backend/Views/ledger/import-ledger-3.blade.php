@@ -32,15 +32,15 @@
                
                 <p class="h5"><span class="text-primary">{{ $result['ledger'] }}</span> ledger keys are inserted.</p>
                 <p class="h5"><span class="text-primary">{{ $result['account'] }}</span> new accounts are detected and inserted.</p>
-                <p class="h5"><span class="text-primary">{{ $result['dim'] }}</span> new dimentions are detected and inserted.</p>
+                <p class="h5"><span class="text-primary">{{ $result['dim'] }}</span> new dimensions are detected and inserted.</p>
                 @endif
             </div>
             <div class="tile-footer text-center">
                 @if($result != null)
-                    <button class="btn btn-primary" type="submit">Go back Ledger List</button>
+                    <a href="{{ route('ledger', [str_replace('?', '', $qs)]) }}" class="btn btn-primary" role="button">Go back Ledger List</a>
+                    <a href="{{ route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]) }}" class="btn btn-info" role="button">Continue Import</a>
                 @else
-                    <button class="btn btn-warning" type="submit">Try Again! <i class="fa fa-angle-double-right"></i></button>
-                    {!! Form::hidden('try_again', 1) !!} 
+                    <a href="{{ route('import-ledger', ['step' => 1, str_replace('?', '', $qs)]) }}" class="btn btn-warning" role="button">Try Again!</a>
                 @endif
 
                    
