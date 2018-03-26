@@ -61,7 +61,7 @@
                     </label>
                 </div>
 
-                <div id='file_upload' class="container">
+                <div id='file_upload' class="col-md-12">
                     <div class="form-group">
                         <label class="control-label">Data File(csv)</label>
                         {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}

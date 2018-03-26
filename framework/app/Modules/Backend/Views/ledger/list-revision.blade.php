@@ -7,8 +7,8 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Create Ledger Data</h1>
-        <p>Import data of Ledger</p>
+        <h1><i class="fa fa-location-arrow"></i> Revision</h1>
+        <p>Manage revision of Ledger</p>
     </div>
 </div>
 
@@ -18,7 +18,7 @@
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'ledgerForm', 'id' => 'ledgerForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Ledger List
+                Ledger Revision List
                 @if(session()->has('error-message'))
                     <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
                 @endif
@@ -30,7 +30,7 @@
             <div class="tile-body">
                 <div class="row">
                     <div class="col-md-4">
-                        {!! Form::select('revision_id', $revisions, $revision_id_selected, ['class' => 'form-control', 'id' => 'revision_id', "multiple"=>false]) !!}
+                        {!! Form::select('upload_id', $upload_entries, $upload_id_selected, ['class' => 'form-control', 'id' => 'upload_id', "multiple"=>false]) !!}
                     </div>
                     
                 </div>
@@ -38,21 +38,24 @@
                 <table class="table table-hover table-bordered" id="item_table">
                     <thead class="thead-dark">
                         <tr>
-                            <th>Ledger Key</th>
-                            <th>Base Amount</th>
-                            <th>Period</th>
-                            
+                            <th>Id</th>
+                            <th>Upload Title</th>
+                            <th>Revision Number</th>
+                            <th>File name</th>
+                            <th>Created at</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($entries as $k=>$item)
+                        @foreach($revisions as $k=>$item)
                         <tr>
-                            <td>{{ $item->ledger_key }}</td>
-                            <td class="text-right">{{ App\Libs\Utils\Vii::formatCurrency($item->base_amount) }}</td>
-                            <td>{{ substr($item->accounting_period, 0, strlen($item->accounting_period) - 3 ) }}</td>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->upload->upload_title }}</td>
+                            <td class="text-right">Revision {{ $item->revision_number }}</td>
+                            <td><a href="{{ route('revision-download', ['id' => $item->id]) }}">{{ basename($item->file_path) }}</a></td>
+                            <td>{{ App\Libs\Utils\Vii::formatDateTime($item->created_at) }}</td>
                             <td>
-                            {{--  <a href="{{ route('dimension-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>  --}}
+                            <a id="delete_revision" href="{{ route('revision-delete', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-danger" role="button"><i class="fa fa-trash"></i>Delete</a>
                             
                             </td>
                         </tr>
@@ -109,13 +112,21 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
-        $('#revision_id').select2({
+        $('#upload_id').select2({
             width: '100%'
         });
 
-        $('#revision_id').on('change', function(e){
+        $('#upload_id').on('change', function(e){
             var id = $(this).val();
-            window.location.href = "{{ $revision_change_url }}" + "&rid=" + id
+            window.location.href = "{{ $upload_change_url }}" + "&upid=" + id
+        });
+
+        $('#delete_revision').on('click', function(e){
+            e.preventDefault();
+            // alert($(this).attr('href'));
+            if(confirm('Are you sure want to delete this revision?')){
+                window.location.href = $(this).attr('href');
+            }
         });
     })
 </script>

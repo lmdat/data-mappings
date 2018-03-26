@@ -6,6 +6,8 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+use Illuminate\Support\Facades\Auth;
+
 class Controller extends BaseController{
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests, SidebarMenuTrait;
 
@@ -24,7 +26,7 @@ class Controller extends BaseController{
     public function __construct(){
 
         //inject admin authentication
-        //$this->middleware('admin_auth');
+        $this->middleware('backend_auth');
 
         //Set language
         app()->setLocale(config('backend.default_lang'));
@@ -41,18 +43,18 @@ class Controller extends BaseController{
         view()->share('lang_common', $this->langCommon);
 
         //Use Session in constructor
-        // $this->middleware(function ($request, $next) {
-        //     view()->share('full_name', $this->guard->user()->first_name . ' ' . $this->guard->user()->surname);
-        //     view()->share('user_role', $this->guard->user()->getMaxRoleName());
+        $this->middleware(function ($request, $next) {
+            view()->share('full_name', $this->guard->user()->first_name . ' ' . $this->guard->user()->last_name);
+            view()->share('user_role', $this->guard->user()->getMaxRoleName());
 
-        //     return $next($request);
-        // });
+            return $next($request);
+        });
 
     }
 
     private function init(){
-        //$this->guardName = 'admin';
-        //$this->guard = Auth::guard($this->guardName);
+        $this->guardName = 'admin';
+        $this->guard = Auth::guard($this->guardName);
         $this->prefixUrl = '';
         $this->mod = strtolower(config('module.backend.folder_name'));
         $this->langCommon = $this->mod . '/common';
@@ -63,6 +65,5 @@ class Controller extends BaseController{
 
     protected function guard(){
         return Auth::guard($this->guardName);
-
     }
 }

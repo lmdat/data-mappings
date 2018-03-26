@@ -42,6 +42,10 @@ class Kernel extends HttpKernel
             'throttle:60,1',
             'bindings',
         ],
+
+        // 'admin_permission' => [
+        //     \App\Modules\Backend\Middlewares\CheckPermission::class,
+        // ],
     ];
 
     /**
@@ -58,5 +62,7 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+
+        'backend_auth' => \App\Modules\Backend\Middleware\BakendAuth::class,
     ];
 }

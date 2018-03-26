@@ -61,7 +61,7 @@
                     </label>
                 </div>
 
-                <div class="container" id="multiple_item_container">
+                <div class="col-md-12" id="multiple_item_container">
                     <div class="form-group">
                         <small class="form-text text-muted">Use the fotmat: ITEM_NAME|SHORT_NAME or just ITEM_NAME</small>
                         {!! Form::textarea('multiple_item', '', ['id'=>'multiple_item', 'class' => 'form-control', 'placeholder' => 'ITEM_NAME|SHORT_NAME or just ITEM_NAME']) !!}

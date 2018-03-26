@@ -256,7 +256,7 @@ trait SidebarMenuTrait{
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     [
-                        'id' => '71',
+                        'id' => '70',
                         'text' => trans($lang_mod . '.list_ledgers'),
                         'url' => 'ledger',
                         'params' => [],
@@ -273,6 +273,16 @@ trait SidebarMenuTrait{
                         'level-icon' => "",
                         'children' => []
                     ],
+
+                    [
+                        'id' => '72',
+                        'text' => trans($lang_mod . '.ledger_revision'),
+                        'url' => 'ledger/revision',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ]
 
                 ]
             ],

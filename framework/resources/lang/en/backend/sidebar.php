@@ -11,6 +11,7 @@ return [
     'ledger' => 'Ledger Data',
         'list_ledgers' => 'List Ledgers',
         'import_ledger' => 'Import Ledger',
+        'ledger_revision' => 'Revision',
 
     'mappings_item' => 'Mappings Item',
         'define_mappings_item' => 'Define Item',

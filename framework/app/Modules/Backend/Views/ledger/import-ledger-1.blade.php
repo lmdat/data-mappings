@@ -7,7 +7,7 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i>Import Ledger Data</h1>
+        <h1><i class="fa fa-location-arrow"></i> Import Ledger Data</h1>
         <p>Import</p>
     </div>
 </div>
@@ -34,31 +34,32 @@
                 <hr>
                 <div class="animated-radio-button">
                     <label>
-                        {!! Form::radio('upload_type', 1, true, ['id' => 'chk_upload1']) !!}<span class="label-text">New Import</span>
+                        {!! Form::radio('upload_type', 1, true, ['id' => 'rdo_upload_new']) !!}<span class="label-text">New Import</span>
                     </label>
+                    @if($total_upload > 0)
                     <label style="margin-left: 10px">
-                        {!! Form::radio('upload_type', 2, false, ['id' => 'chk_upload2']) !!}<span class="label-text">Revision Import</span>
+                        {!! Form::radio('upload_type', 2, false, ['id' => 'rdo_upload_revision', 'style'=>'display: none']) !!}<span class="label-text">Revision Import</span>
                     </label>
+                    @endif
                 </div>
-                <div class="container">
-                    <div id="new_import" class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">Upload Title</label>
-                            {!! Form::text('upload_title', '', ['id'=>'upload_title', 'class' => 'form-control']) !!}
-                        </div>      
-                    </div>
-                    
-                    <div id="revision_import" class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">Select Upload Title</label>
-                            {!! Form::select('upload_id', $upload_ledgers, '', ['class' => 'form-control', 'id' => 'upload_id']) !!}
-                        </div>      
-                    </div>
+
+                
+                <div class="col-md-6">
+                    <div id="new_import" class="form-group">
+                        <label class="control-label">Upload Title</label>
+                        {!! Form::text('upload_title', '', ['id'=>'upload_title', 'class' => 'form-control']) !!}
+                    </div>     
+                    @if($total_upload > 0)
+                    <div id="revision_import" class="form-group">
+                        <label class="control-label">Select Upload Title</label>
+                        {!! Form::select('upload_id', $upload_ledgers, '', ['class' => 'form-control', 'id' => 'upload_id']) !!}
+                    </div>  
+                    @endif    
                 </div>
-                      
+
             </div>
             <div class="tile-footer text-right">
-                    <button class="btn btn-primary" type="submit">Next <i class="fa fa-angle-double-right"></i></button>
+                <button class="btn btn-primary" type="submit">Next <i class="fa fa-angle-double-right"></i></button>
             </div>
         </div>
             {!! Form::hidden('step', $step) !!} 
@@ -70,16 +71,18 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
+        @if($total_upload > 0)
         $('#revision_import').hide();
-
+        @endif 
+        
         $('input[type=radio]').on('click', function(){
             if($(this).val() == 1){
-                $('#new_import').show(500);
-                $('#revision_import').hide(500);
+                $('#new_import').show(300);
+                $('#revision_import').hide(300);
             }
             else if($(this).val() == 2){
-                $('#new_import').hide(500);
-                $('#revision_import').show(500);
+                $('#new_import').hide(300);
+                $('#revision_import').show(300);
             }
             
         });

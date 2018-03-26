@@ -7,7 +7,7 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i>Import Ledger Data</h1>
+        <h1><i class="fa fa-location-arrow"></i> Import Ledger Data</h1>
         <p>Import</p>
     </div>
 </div>

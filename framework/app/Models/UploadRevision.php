@@ -14,6 +14,7 @@ class UploadRevision extends Model{
         'upload_id',
         'company_id',
         'revision_number',
+        'file_path',
         'created_at',
         'status'
     ];

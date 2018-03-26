@@ -8,6 +8,8 @@ Route::group([
 ], function(){
     Route::get('/', ['uses' => 'DashboardController@welcome']);
 
+    Route::get('/login', ['as' => 'admin-login', 'uses' => 'AuthController@getLogin']);
+
     // Mappings Item
     Route::group(
         [
@@ -92,11 +94,16 @@ Route::group([
 
         
         Route::match(['get', 'post'], '/', ['uses' => 'LedgerController@getLedger'])->name('ledger');
-
+        
         Route::get('/import/{step?}', ['uses' => 'LedgerController@getImportLedger'])->name('import-ledger');
 
         Route::post('/import', ['uses' => 'LedgerController@postImportLedger'])->name('ledger-post-import');
 
+        Route::match(['get', 'post'], '/revision', ['uses' => 'LedgerController@getRevision'])->name('revision');
+
+        Route::get('/revision/delete/{id}', ['uses' => 'LedgerController@getDeleteRevision'])->name('revision-delete');
+
+        Route::get('/revision/download/{id}', ['uses' => 'LedgerController@getDownloadRevisionFile'])->name('revision-download');
        
 
 

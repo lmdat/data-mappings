@@ -2,6 +2,7 @@
 namespace App\Modules\Backend\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Libs\Utils\Vii;
 
 use App\Models\Dimension;
@@ -18,6 +19,8 @@ class LedgerController extends Controller{
 
     private $company_id;
 
+    private $mime;
+
     public function __construct(){
         parent::__construct();
 
@@ -27,20 +30,45 @@ class LedgerController extends Controller{
         $this->prefixUrl = $actions['prefix'];
 
         $this->company_id = 1;
+
+        $this->mime = [
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'xls' => 'application/vnd.ms-excel',
+            'csv' => 'application/vnd.ms-excel'
+        ];
     }
 
     public function getLedger(Request $request, $id=null){
 
         $display_rows = $request->input('rows_per_page', 15);
 
-        $aqs = $request->except('page'); 
+        $aqs = $request->except(['page']); 
         // unset($aqs['page']);
         $paging_qs = Vii::queryStringBuilder($aqs);
 
-        $com_id = 1;
+        $revision_id = $request->get('rid', '');
 
-        $entries = Ledger::where('company_id', $com_id)
-            ->select(['account_code', 'ledger_key', 'base_amount', 'accounting_period'])
+        // echo($revision_id);
+
+        $revision_entries = UploadRevision::where('company_id', $this->company_id)
+            ->orderBy('created_at', 'DESC')
+            ->get();
+        
+        $revisions = [];
+        foreach($revision_entries as $entry){
+           
+            $revisions[] = [
+                'id' => $entry->id,
+                'text' => $entry->upload->upload_title . '&rarr;(Revision ' .  $entry->revision_number . ')'
+            ];
+        }
+
+        // dd($revisions);
+        $sql = Ledger::where('company_id', $this->company_id);
+        if($revision_id != ''){
+            $sql->where('revision', $revision_id);
+        }
+        $entries = $sql->select(['account_code', 'ledger_key', 'base_amount', 'accounting_period'])
             ->orderBy('account_code', 'ASC')
             ->orderBy('accounting_period', 'ASC')
             ->paginate($display_rows);
@@ -77,10 +105,13 @@ class LedgerController extends Controller{
         return view(
             'Backend::ledger.list-ledger',
                 [
-                    'form_uri' => ($id == null) ? route('dimension-post-create') : route('dimension-put-edit', [$id]),
+                    'form_uri' => route('ledger'),
                     'page_title' => 'Ledger',
                     'entries' => $entries,
                     'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                    'revisions' => Vii::createOptionData($revisions, 'id', ['text']),
+                    'revision_change_url' => route('ledger', [str_replace('?', '', Vii::queryStringBuilder($request->except(['page', 'rid'])))]),
+                    'revision_id_selected' => $revision_id
                     // 'dim' => $dim,
                     // 'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
                     // 'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
@@ -89,6 +120,96 @@ class LedgerController extends Controller{
                     //'user' => session()->get('test-name', $full_name)
                 ]
         );
+    }
+
+    public function getRevision(Request $request){
+
+        $display_rows = $request->input('rows_per_page', 15);
+
+        $aqs = $request->except(['page']); 
+        // unset($aqs['page']);
+        $paging_qs = Vii::queryStringBuilder($aqs);
+
+        $upload_entries = UploadLedger::where('company_id', $this->company_id)
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        $upload_id = $request->get('upid');
+
+        $sql = UploadRevision::where('company_id', $this->company_id);
+             
+        if($upload_id != ''){
+            $sql->where('upload_id', $upload_id);
+        }
+        $entries = $sql->select('*')
+            ->orderBy('upload_id', 'DESC')
+            ->orderBy('revision_number', 'DESC')
+            ->paginate($display_rows);
+        
+        $entries->withPath(route('revision', [str_replace('?', '', $paging_qs)]));
+
+        // dd($upload_entries->toArray());
+
+
+        return view(
+            'Backend::ledger.list-revision',
+                [
+                    'form_uri' => route('revision'),
+                    'page_title' => 'Revision of Ledger',
+                    'entries' => $entries,
+                    'qs' => Vii::queryStringBuilder($request->getQueryString()),
+                    'upload_entries' => Vii::createOptionData($upload_entries->toArray(), 'id', ['upload_title']),
+                    'revisions' => $entries,
+                    'upload_change_url' => route('revision', [str_replace('?', '', Vii::queryStringBuilder($request->except(['page', 'upid'])))]),
+                    'upload_id_selected' => $upload_id
+                    
+                ]
+        );
+    }
+
+    public function getDownloadRevisionFile(Request $request, $id=null){
+
+        $revision = UploadRevision::where('id', $id)
+            ->where('company_id', $this->company_id)
+            ->first();
+        // dd($revision->toArray());
+        
+        // Headers
+        $pinfo = pathinfo($revision->file_path);
+
+        $headers = [
+            'Content-Type: ' . $this->mime[$pinfo['extension']]
+        ];
+
+        // $file_path = storage_path('app/' . $revision->file_path);
+        // return response()->download($file_path, $pinfo['basename'], $headers);
+
+        return Storage::download($revision->file_path, $pinfo['basename'], $headers);
+        
+    }
+
+    public function getDeleteRevision(Request $request, $id=null){
+        $revision = UploadRevision::where('id', $id)
+            ->where('company_id', $this->company_id)
+            ->first();
+        
+        // Delete Ledger
+        Ledger::where('revision', $revision->id)->delete();
+
+        if(UploadRevision::where('upload_id', $revision->upload_id)->where('company_id', $this->company_id)->count() == 1){
+            UploadLedger::destroy($revision->upload_id);
+        }
+
+        if(Storage::exists($revision->file_path)){
+            Storage::delete($revision->file_path);
+        }
+        
+        $revision->delete();
+
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+
+        return redirect()
+                    ->route('revision', [str_replace('?', '', $qs)]);
     }
 
     public function postCreateDimension(Request $request){
@@ -206,7 +327,8 @@ class LedgerController extends Controller{
             $entries = UploadLedger::where('company_id', $this->company_id)
                 ->orderBy('created_at', 'DESC')
                 ->get(['id', 'upload_title']);
-            
+
+                      
             $upload_ledgers = [];
             foreach($entries as $entry){
                 $tmp = $entry;
@@ -230,6 +352,7 @@ class LedgerController extends Controller{
                     'page_title' => 'Import Ledger - Step ' . $step,
                     'step' => $step,
                     'qs' => $qs,
+                    'total_upload' => $entries->count(),
                     'upload_ledgers' => Vii::createOptionData($upload_ledgers, 'id', ['upload_title'], false)                                    
                     //'user' => session()->get('test-name', $full_name)
                 ]
@@ -412,18 +535,13 @@ class LedgerController extends Controller{
     }
 
     private function getTrueFileExtension($ufile){
-        $mime = [
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'xls' => 'application/vnd.ms-excel',
-            'csv' => 'application/vnd.ms-excel'
-        ];
 
         $ext = null;
-        if($ufile->getClientMimeType() == $mime['xlsx']){   // .xlsx
+        if($ufile->getClientMimeType() == $this->mime['xlsx']){   // .xlsx
             $ext = 'xlsx';
         }
         else{
-            if($ufile->getClientOriginalExtension() == $mime['xls']){    // .xls
+            if($ufile->getClientOriginalExtension() == $this->mime['xls']){    // .xls
                 $ext = 'xls';
             }
             else{   // .csv
@@ -520,7 +638,7 @@ class LedgerController extends Controller{
         $acc_data = [];
         $dim_data = [];
         $ledger_data = [];
-        $revision_id = $this->createRevision();
+        $revision_id = $this->createRevision($request);
 
         for($row=1; $row<=$highestRow; $row++){
             if($row == 1 && $request->post('skip_headers') != null)
@@ -660,8 +778,9 @@ class LedgerController extends Controller{
         return $done;
     }
 
-    private function createRevision(){
+    private function createRevision($request){
         // Create Revision
+        $file_info = session()->get('file_info');
         $upload_revision = session()->get('upload_revision');
         $upload_ledger = null;
 
@@ -690,7 +809,8 @@ class LedgerController extends Controller{
             'company_id' => $this->company_id,
             'created_at' => date('Y-m-d H:i:s'),
             'status' => 1,
-            'revision_number' => $count + 1
+            'revision_number' => $count + 1,
+            'file_path' => $file_info['file_path']
         ];
         
         $upload_revision = UploadRevision::create($data);
