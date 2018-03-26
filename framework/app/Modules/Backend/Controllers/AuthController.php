@@ -25,20 +25,21 @@ class AuthController extends \Illuminate\Routing\Controller{
 
         app()->setLocale(config('backend.lang'));
                     
-        view()->share('assets', config('backend.media'));
+        view()->share('css', config('backend.css'));
+        view()->share('js', config('backend.js'));
                 
         $start = config('backend.start_year');
         $copy_year = (date('Y') == $start) ? $start : $start . '-' . date('Y');
         view()->share('copy_right_year', $copy_year);
 
-        view()->share('lang_mod', strtolower(config('module.modules.admin.folder_name')) . '/' . self::$langName);
+        view()->share('lang_mod', strtolower(config('module.backend.folder_name')) . '/' . self::$langName);
     }
     
     public function postLogin(Request $request){
         
         $credentials = [
-            'email' => $request->input('email'),
-            'password' => $request->input('password')
+            'email' => $request->post('email'),
+            'password' => $request->post('password')
         ];
         
         $remember_me = false;
@@ -47,23 +48,27 @@ class AuthController extends \Illuminate\Routing\Controller{
        
         if($this->guard->attempt($credentials, $remember_me)){
             $admin = $this->guard->user();
-            if($admin->active == 0){
+            if($admin->status == 0){
                 $this->guard->logout();
-                return redirect(self::$BASE_URL . 'login')->with('message-error', 'Account is not actived.');
+                return redirect()
+                    ->route('backend-login')
+                    ->with('message-error', 'User is not actived.');
             }
             
-            return redirect(self::$BASE_URL);
+            return redirect()->route('dashboard');
         }
         
         
-        return redirect()->route('admin.login')->with('message-error', 'The credentials is not found.');
+        return redirect()
+            ->route('backend-login')
+            ->with('message-error', 'The credentials is not found.');
 
     }
     
     public function getLogin(Request $request){
         
          return view(
-            'Backend::admin.login',[
+            'Backend::user.login',[
                 'login_or_lock' => 'login-page'
             ]
         );
@@ -72,6 +77,6 @@ class AuthController extends \Illuminate\Routing\Controller{
     public function getLogout(){
         $this->guard->logout();
         session()->flush();
-        return redirect()->guest(self::$BASE_URL . 'login');
+        return redirect()->guest(route('backend-login'));
     }
 }

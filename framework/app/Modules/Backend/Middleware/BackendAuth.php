@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Auth;
 use Closure;
-use Config;
 
 use Illuminate\Contracts\Auth\Guard;
 
@@ -51,7 +50,7 @@ class BackendAuth{
                 if ($request->ajax()) {
                     return response()->json(['error'=>"Unauthorized."], 401);
                 } else {
-                    return redirect()->guest(config('auth.authentication_url.admin.login'));
+                    return redirect()->guest(route('backend-login'));
                 }
             }
 

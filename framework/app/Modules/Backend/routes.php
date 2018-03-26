@@ -6,9 +6,37 @@ Route::group([
     'middleware' => ['web']
 
 ], function(){
-    Route::get('/', ['uses' => 'DashboardController@welcome']);
+    Route::get('/', ['uses' => 'DashboardController@welcome'])->name('dashboard');
 
-    Route::get('/login', ['as' => 'admin-login', 'uses' => 'AuthController@getLogin']);
+    Route::get('/login', ['as' => 'backend-login', 'uses' => 'AuthController@getLogin']);
+
+    Route::post('/login', ['as' => 'backend-post-login', 'uses' => 'AuthController@postLogin']);
+    
+    Route::get('/logout', ['as' => 'backend-logout', 'uses' => 'AuthController@getLogout']);
+
+    //Admin User
+    Route::group(
+        [
+            'prefix' => 'user',
+            // 'middleware' => ['admin_permission'],
+            // 'roles' => [700, 500]
+        ], function(){
+
+            Route::match(['get', 'post'], '/', ['uses' => 'UserController@getUser'])->name('user');
+
+            Route::post('/create', ['uses' => 'UserController@postCreateUser'])->name('user-post-create');
+ 
+            Route::put('/edit/{id}', ['uses' => 'UserController@putEditUser'])->name('user-put-edit');
+
+
+            // Route::get('/create', ['uses' => 'AdminController@getUserForm']);
+            // Route::post('/create', ['uses' => 'AdminController@postUserCreate']);
+
+            // Route::get('/edit/{id}', ['uses' => 'AdminController@getUserForm']);
+            // Route::put('/edit/{id}', ['uses' => 'AdminController@putUserEdit']);
+
+            // Route::get('/delete/{id}', ['uses' => 'AdminController@getDelete']);
+    });
 
     // Mappings Item
     Route::group(

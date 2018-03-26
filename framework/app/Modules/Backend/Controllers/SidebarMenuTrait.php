@@ -21,36 +21,27 @@ trait SidebarMenuTrait{
                 'children' => []
             ],
 
-            // [
-            //     'id' => '',
-            //     'text' => trans($lang_mod . '.mapping_item'),
-            //     'url' => '#',
-            //     'params' => [],
-            //     'icon' => "<i class='fa fa-folder-open' aria-hidden='true'></i>",
-            //     'level-icon' => "<i class='fa fa-angle-left pull-right' aria-hidden='true'></i>",
-            //     'children' => [
-            //         [
-            //             'id' => '',
-            //             'text' => trans($lang_mod . '.catalog_list'),
-            //             'url' => 'catalog',//'admin/users',
-            //             'params' => [],
-            //             'icon' => "<i class='fa fa-angle-double-right' aria-hidden='true'></i>",
-            //             'level-icon' => "",
-            //             'children' => []
-            //         ],
+            [
+                'id' => '',
+                'text' => trans($lang_mod . '.user'),
+                'url' => '#',
+                'params' => [],
+                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
+                'children' => [
+                    
+                    [
+                        'id' => '21',
+                        'text' => trans($lang_mod . '.add_user'),
+                        'url' => 'user',//'admin/users',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right' aria-hidden='true'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ]
 
-            //         [
-            //             'id' => '',
-            //             'text' => trans($lang_mod . '.add_catalog'),
-            //             'url' => 'catalog/create',//'admin/users',
-            //             'params' => [],
-            //             'icon' => "<i class='fa fa-angle-double-right' aria-hidden='true'></i>",
-            //             'level-icon' => "",
-            //             'children' => []
-            //         ]
-
-            //     ],
-            // ],
+                ],
+            ],
 
             // [
             //     'id' => '',

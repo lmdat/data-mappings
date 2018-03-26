@@ -17,13 +17,15 @@ class DashboardController extends Controller{
 
     public function welcome(){
 
-        $full_name = 'Vincent Valentine';//$this->guard->user()->first_name . ' ' . $this->guard->user()->surname;
-        session()->flush();
+        $full_name = $this->guard->user()->first_name . ' ' . $this->guard->user()->last_name;
+        // dd(bcrypt('123456'));
+        // dd($this->guard->user()->maxRole());
+
         return view(
             'Backend::dashboard.welcome',
             [
                 'page_title' => 'Dashboard',
-                'user' => session()->get('test-name', $full_name)
+                'user' => $full_name//session()->get('test-name', $full_name)
             ]
         );
     }

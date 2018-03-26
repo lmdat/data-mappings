@@ -14,14 +14,14 @@
 
 <div class="row">
     <div class="col-md-7">
-        @include('Backend::account.list-account', ['entries' => $entries, 'qs' => $qs])
+        {{--  @include('Backend::user.list-user', ['entries' => $entries, 'qs' => $qs])  --}}
     </div>
 
     <div class="col-md-5">
-        {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'accountForm', 'id' => 'accountForm', 'role' => 'form', 'files' => true]) !!}
+        {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'userForm', 'id' => 'userForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Insert Account
+                Create User
                 {{--  @if(session()->has('error-message'))
                     <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
                 @endif
@@ -31,25 +31,46 @@
                 @endif  --}}
             </h4>
             <div class="tile-body">
-                <div class="form-group">
-                    <label class="control-label">Company</label>
-                    {!! Form::select('company_id', $companies, '', ['class' => 'form-control', 'id' => 'company_id']) !!}
-                    
+               
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <label class="control-label">First Name</label>
+                        {!! Form::text('first_name', '', ['id'=>'first_name', 'class' => 'form-control']) !!}
+                   </div>
+
+                   <div class="col-md-6">
+                         <label class="control-label">Last Name</label>
+                         {!! Form::text('last_name', '', ['id'=>'last_name', 'class' => 'form-control']) !!}
+                   </div>
                 </div>
 
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">Account Code</label>
-                        {!! Form::text('account_code', '', ['id'=>'account_code', 'class' => 'form-control']) !!}
-                   </div>
+                        <label class="control-label">Email</label>
+                        {!! Form::email('email', '', ['id'=>'email', 'class' => 'form-control']) !!}
+                    </div>
 
-                   <div class="col-md-6">
-                         <label class="control-label">Account Name</label>
-                         {!! Form::text('account_name', '', ['id'=>'account_name', 'class' => 'form-control']) !!}
-                   </div>
+                    <div class="col-md-6">
+                        <label class="control-label">Password</label>
+                        {!! Form::password('password', ['id'=>'password', 'class' => 'form-control']) !!}
+                        
+                    </div>
                 </div>
 
-                <div class="animated-checkbox">
+                <div class="form-group">
+                    <label class="control-label">Role</label>
+                    <select id="role_id" name="role_id" class="form-control">
+                        <option value="" selected>---</option>
+                        @foreach($roles as $role)
+                        <option value="{{$role->id}}" @if(in_array($role->power, $disabled_roles)) disabled @endif>{{ $role->role_name }}</option>
+                        @endforeach
+                    </select>
+                    
+                    {{--  {!! Form::select('role_id', $roles, '', ['class' => 'form-control', 'id' => 'company_id']) !!}  --}}
+                    
+                </div>
+
+                {{--  <div class="animated-checkbox">
                     <label>
                         {!! Form::checkbox('show_multiple', '1', false, ['id' => 'chk_show_multiple']) !!}<span class="label-text">Insert multiple accounts?</span>
                     </label>
@@ -67,7 +88,7 @@
                             {!! Form::checkbox('skip_first_line', '1', false, ['id' => 'chk_skip']) !!}<span class="label-text">Skip first line for headers?</span>
                         </label>
                     </div>
-                </div>
+                </div>  --}}
 
                 {{--  <div class="form-group" id="multiple_account_container">
                     <small class="form-text text-muted">Use the fotmat: ACCOUNT_CODE|ACCOUNT_NAME</small>

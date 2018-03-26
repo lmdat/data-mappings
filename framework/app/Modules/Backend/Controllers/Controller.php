@@ -42,6 +42,8 @@ class Controller extends BaseController{
         view()->share('copy_right_year', $copy_year);
         view()->share('lang_common', $this->langCommon);
 
+        
+
         //Use Session in constructor
         $this->middleware(function ($request, $next) {
             view()->share('full_name', $this->guard->user()->first_name . ' ' . $this->guard->user()->last_name);

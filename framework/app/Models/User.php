@@ -49,4 +49,57 @@ class User extends Authenticatable
     public function roles(){
         return $this->belongsToMany('App\Models\Role', 'user_role', 'user_id', 'role_id');
     }
+
+    public function maxRole(){
+        return $this->roles()->max('power');
+    }
+
+    public function getMaxRoleAlias($max=0){
+        if($max == 0)
+            $max = $this->maxRole();
+
+        $role = $this->roles()->where('power', $max)->first();
+
+        if($role != null)
+            return $role->alias;
+
+        return false;
+    }
+
+    public function getMaxRoleName($max=0){
+        if($max == 0)
+            $max = $this->maxRole();
+
+        $role = $this->roles()->where('power', $max)->first();
+
+        if($role != null)
+            return $role->role_name;
+
+        return false;
+    }
+
+    public function hasRole($pows){
+        $my_role = intval($this->maxRole());
+        if($my_role == 9999)
+            return true;
+
+        $passed = true;
+        if(is_array($pows)){
+            if(!in_array($my_role, $pows)){
+                foreach($pows as $p){
+                    if(intval($p) > $my_role){
+                        $passed = false;
+                        break;
+                    }
+                }
+            }
+        }
+        else{
+            if(intval($pows) > $my_role)
+                $passed = false;
+        }
+
+        return $passed;
+    }
+
 }

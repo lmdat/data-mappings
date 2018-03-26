@@ -2,6 +2,10 @@
 
 return [
     'dashboard' => 'Dashboard',
+
+    'user' => 'User',
+        'add_user' => 'Create User',
+
     'account' => 'Account',
         'define_account' => 'Define Account',
 

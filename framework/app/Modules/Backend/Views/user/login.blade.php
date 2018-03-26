@@ -1,7 +1,7 @@
 @extends('Backend::layouts.auth')
 
 @section('title')
-    "Login"
+    Login
 @stop
 
 @section('content')
@@ -11,16 +11,15 @@
 
 <section class="login-content">
     <div class="logo">
-        <h1>Vali</h1>
+        <h1>x.d.m</h1>
     </div>
-    <div class="login-box">
-    @if(!Session::has('message-error'))
-        <div class="login-box-msg">{{ trans($lang_mod . '.title') }}</div>
-    @else
-        <div class="alert alert-danger"><strong>Oh snap!</strong> {{ Session::get('message-error') }}</div>
+    @if(session()->has('message-error'))
+        <span class="badge badge-danger">
+            <strong>Oh snap!</strong> {{ session()->get('message-error') }}
+        </span>
     @endif
-
-    {!! Form::open(['url' => Request::url(), 'name' => 'loginForm', 'id' => 'loginForm', 'role' => 'form']) !!}
+    <div class="login-box">
+    {!! Form::open(['url' => route('backend-post-login'), 'class' => 'login-form', 'name' => 'loginForm', 'id' => 'loginForm', 'role' => 'form']) !!}
         <h3 class="login-head"><i class="fa fa-lg fa-fw fa-user"></i>SIGN IN</h3>
         <div class="form-group has-feedback">
             <label class="control-label">Email</label>
@@ -53,6 +52,10 @@
 
 @section('scripts')
 <script type="text/javascript">
-   
-</script>
+    // Login Page Flipbox control
+    $('.login-content [data-toggle="flip"]').click(function() {
+        $('.login-box').toggleClass('flipped');
+        return false;
+    });
+  </script>
 @stop
