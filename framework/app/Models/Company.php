@@ -33,4 +33,9 @@ class Company extends Model{
     public function ledgers(){
         return $this->hasMany('App\Models\Ledger', 'company_id');
     }
+
+    public function users(){
+        return $this->belongsToMany('App\Models\User', 'user_company', 'company_id', 'user_id');
+    }
+
 }

@@ -13,11 +13,11 @@
 </div>
 
 <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-8">
         @include('Backend::account.list-account', ['entries' => $entries, 'qs' => $qs, 'curr_id' => $account->id])
     </div>
 
-    <div class="col-md-5">
+    <div class="col-md-4">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'put', 'name' => 'accountForm', 'id' => 'accountForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">

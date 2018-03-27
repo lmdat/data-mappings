@@ -1,7 +1,7 @@
     
     <div class="tile">
         <h4 class="tile-title">
-            Account List
+            User List
             @if(session()->has('error-message'))
                 <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
             @endif
@@ -14,8 +14,12 @@
             <table class="table table-hover table-bordered" id="item_table">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Code</th>
-                        <th>Account Name</th>
+                        <th>Id</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Permission</th>
+                        <th>Company</th>
                         <th>Status</th>
                         <th></th>
                     </tr>
@@ -23,21 +27,33 @@
                 <tbody>
                     @foreach($entries as $k=>$item)
                     <tr @if($item->id == @$curr_id) class='table-primary' @endif>
-                        <td>{{ $item->account_code }}</td>
-                        <td>{{ $item->account_name }}</td>
+                        <td>{{ $item->id }}</td>
+                        <td>{{ $item->first_name }}</td>
+                        <td>{{ $item->last_name }}</td>
+                        <td>{{ $item->email }}</td>
+                        <td>{{$item->getMaxRoleName()}}</td>
+                        <td>
+                        <?php
+                            $coms = $item->companies()->orderBy('company_name', 'ASC')->get();
+                            $n = count($coms);
+                        ?>
+                        @for($i=0; $i<$n; $i++)
+                            <small>{{$coms[$i]->short_name}}</small>&nbsp;
+                            @if($i % $n == 2) <br/> @endif
+                        @endfor
+                        </td>
                         <td>
                         @if($item->status == 1)
                             {{--  <span class="badge badge-info">On</span>  --}}
-                            <a href="#" class="badge badge-info">On</a>
+                            <a href="{{ route('user-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-info">On</a>
                         @else
                             {{--  <span class="badge badge-secondary">Off</span>  --}}
-                            <a href="#" class="badge badge-secondary">Off</a>
+                            <a href="{{ route('user-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-secondary">Off</a>
                         @endif
                         </td>
                         <td>
-                        <a href="{{ route('account-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
-                        
-                            
+                            <a href="{{ route('user-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
+                            <a href="{{ route('user-assign-company', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-primary" role="button"><i class="fa fa-link"></i>Assign</a>
                         </td>
                     </tr>
                     @endforeach

@@ -13,11 +13,11 @@
 </div>
 
 <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-8">
         @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs])
     </div>
 
-    <div class="col-md-5">
+    <div class="col-md-4">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'dimForm', 'id' => 'dimForm', 'role' => 'form', 'files' => true]) !!}
         <div class="tile">
             <h4 class="tile-title">

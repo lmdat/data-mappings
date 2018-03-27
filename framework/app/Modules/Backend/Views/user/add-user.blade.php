@@ -7,17 +7,17 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Define Account</h1>
-        <p>Import data of Account</p>
+        <h1><i class="fa fa-location-arrow"></i> Manage User</h1>
+        <p>Create/Edit User</p>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-7">
-        {{--  @include('Backend::user.list-user', ['entries' => $entries, 'qs' => $qs])  --}}
+    <div class="col-md-8">
+        @include('Backend::user.list-user', ['entries' => $entries, 'qs' => $qs])
     </div>
 
-    <div class="col-md-5">
+    <div class="col-md-4">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'userForm', 'id' => 'userForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">
@@ -107,21 +107,6 @@
 
 @section('scripts')
 <script type="text/javascript">
-    $(function(){
-        $('#file_upload').hide()
-        $('#chk_show_multiple').on('click', function(){
-            if($(this).is(':checked')){
-                $('#account_code').attr('disabled', true);
-                $('#account_name').attr('disabled', true);
-                $('#file_upload').show(500);
-            }
-            else{
-                $('#account_code').attr('disabled', false);
-                $('#account_name').attr('disabled', false);
-                $('#file_upload').hide(500);
-            }
-                
-        });
-    })
+    
 </script>
 @stop

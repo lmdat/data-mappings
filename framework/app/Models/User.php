@@ -46,12 +46,29 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function companies(){
+        return $this->belongsToMany('App\Models\Company', 'user_company', 'user_id', 'company_id');
+    }
+
     public function roles(){
         return $this->belongsToMany('App\Models\Role', 'user_role', 'user_id', 'role_id');
     }
 
     public function maxRole(){
         return $this->roles()->max('power');
+    }
+
+ 
+    public function roleId($max=0){
+        if($max == 0)
+            $max = $this->maxRole();
+
+        $role = $this->roles()->where('power', $max)->first();
+        
+        if($role != null)
+            return $role->id;
+
+        return false;
     }
 
     public function getMaxRoleAlias($max=0){
@@ -101,5 +118,7 @@ class User extends Authenticatable
 
         return $passed;
     }
+
+    
 
 }

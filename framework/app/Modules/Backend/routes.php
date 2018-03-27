@@ -24,9 +24,17 @@ Route::group([
 
             Route::match(['get', 'post'], '/', ['uses' => 'UserController@getUser'])->name('user');
 
+            Route::match(['get', 'post'], '/edit/{id}', ['uses' => 'UserController@getUser'])->name('user-edit');
+            
+            Route::match(['get', 'post'], '/assign-company/{id}', ['uses' => 'UserController@getAssignCompany'])->name('user-assign-company');
+
             Route::post('/create', ['uses' => 'UserController@postCreateUser'])->name('user-post-create');
  
-            Route::put('/edit/{id}', ['uses' => 'UserController@putEditUser'])->name('user-put-edit');
+            Route::put('/edit/{id?}', ['uses' => 'UserController@putEditUser'])->name('user-put-edit');
+
+            Route::get('/status/{id}', ['uses' => 'UserController@getChangeStatus'])->name('user-get-status');
+
+            Route::post('/assign-company/{id?}', ['uses' => 'UserController@postAssignCompany'])->name('user-post-assign');
 
 
             // Route::get('/create', ['uses' => 'AdminController@getUserForm']);
