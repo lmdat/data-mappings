@@ -26,7 +26,7 @@ class Controller extends BaseController{
     public function __construct(){
 
         //inject admin authentication
-        $this->middleware('backend_auth');
+        $this->middleware(['backend_auth', 'company_selection']);
 
         //Set language
         app()->setLocale(config('backend.default_lang'));

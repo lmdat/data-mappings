@@ -16,16 +16,17 @@
 </head>
 <body class="app sidebar-mini">
     <header class="app-header">
-        <a class="app-header__logo" href="{{url('/')}}">Vali</a>
+        <a class="app-header__logo" href="{{url('/')}}">x.d.m</a>
         <!-- Sidebar toggle button-->
         <a class="app-sidebar__toggle" href="#" data-toggle="sidebar"></a>
 
         <ul class="app-nav">
             <!-- User Menu-->
-            <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown"><i class="fa fa-user fa-lg"></i></a>
+            <li><a id="select_company" class="app-nav__item" href="javascript:void(0)" data-toggle="dropdown">Working Company: {{session()->get('selected_company_name', 'None')}}</a></li>
+            <li class="dropdown"><a class="app-nav__item" href="javascript:void(0)" data-toggle="dropdown"><i class="fa fa-user fa-lg"></i></a>
                 <ul class="dropdown-menu settings-menu dropdown-menu-right">
-                    <li><a class="dropdown-item" href="page-user.html"><i class="fa fa-cog fa-lg"></i> Settings</a></li>
-                    <li><a class="dropdown-item" href="page-user.html"><i class="fa fa-user fa-lg"></i> Profile</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fa fa-cog fa-lg"></i> Settings</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fa fa-user fa-lg"></i> Profile</a></li>
                     <li><a class="dropdown-item" href="{{ route('backend-logout') }}"><i class="fa fa-sign-out fa-lg"></i> Logout</a></li>
                 </ul>
             </li>
@@ -57,6 +58,13 @@
     @yield ('js-link')
     
     @yield ('scripts')
-    
+    <script>
+        $(function(){
+            $('#select_company').on('click', function(e){
+                e.preventDefault();
+                location.href = "{{route('company-get-select')}}";
+            });
+        });
+    </script>
 </body>
 </html>

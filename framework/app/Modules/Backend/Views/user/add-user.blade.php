@@ -35,7 +35,7 @@
                 <div class="form-group row">
                     <div class="col-md-6">
                         <label class="control-label">First Name</label>
-                        {!! Form::text('first_name', '', ['id'=>'first_name', 'class' => 'form-control']) !!}
+                        {!! Form::text('first_name', '', ['id'=>'first_name', 'class' => 'form-control', 'autofocus']) !!}
                    </div>
 
                    <div class="col-md-6">

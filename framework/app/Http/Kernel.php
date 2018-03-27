@@ -65,5 +65,7 @@ class Kernel extends HttpKernel
 
         'backend_auth' => \App\Modules\Backend\Middleware\BackendAuth::class,
         'route_authorization' =>  \App\Modules\Backend\Middleware\BackendAuthorization::class,
+
+        'company_selection' => \App\Modules\Backend\Middleware\CompanySelection::class
     ];
 }

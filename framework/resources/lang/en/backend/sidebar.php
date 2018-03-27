@@ -6,6 +6,10 @@ return [
     'user' => 'User',
         'add_user' => 'Create User',
 
+    'company' => 'Company',
+        'add_company' => 'Create Company',
+        'select_company' => 'Select Company',
+
     'account' => 'Account',
         'define_account' => 'Define Account',
 

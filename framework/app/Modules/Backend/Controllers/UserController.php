@@ -172,7 +172,7 @@ class UserController extends Controller{
                 'page_title' => 'Assign Company for User',
                 'entries' => $entries,
                 'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                'companies' => Vii::createOptionData($company_entries->toArray(), 'id', ['company_name']),
+                'companies' => Vii::createOptionData($company_entries->toArray(), 'id', ['company_name'], false),
                 'user' => $user
 
                 //'type_list' => Vii::createOptionData($mappings_type->toArray(), 'id', ['type_name', 'short_code']),
@@ -218,7 +218,7 @@ class UserController extends Controller{
     public function putEditUser(Request $request, $id=null){
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
-        $_form = $request->only(['id', 'first_name', 'last_name', 'email', 'password', 'role_id']);
+        $_form = $request->only(['id', 'first_name', 'last_name', 'email', 'password']);
 
         $data = [
             'first_name' => trim($_form['first_name']),
@@ -233,8 +233,11 @@ class UserController extends Controller{
         // dd($model->toArray());
 
         if($model->update($data)){ //$model->update($data);
+            $rid = $request->post('role_id', null);
+            
             $model->roles()->detach();
-            $model->roles()->attach(intval($_form['role_id']));
+            if($rid != null)
+                $model->roles()->attach(intval($rid));
 
             return redirect()
                 ->route('user', [str_replace('?', '', $qs)])
@@ -263,8 +266,10 @@ class UserController extends Controller{
         
         $user = User::findOrFail($user_id);
         $user->companies()->detach();
-        if(count($coms) > 0) 
+        if(count($coms) > 0){
             $user->companies()->attach($coms);
+        }
+            
         
         $qs = Vii::queryStringBuilder($request->getQueryString());
         return redirect()

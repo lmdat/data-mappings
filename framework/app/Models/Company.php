@@ -11,6 +11,9 @@ class Company extends Model{
 
     protected $fillable = [
         'company_name',
+        'short_name',
+        'phone',
+        'mobile',
         'status'
     ];
 

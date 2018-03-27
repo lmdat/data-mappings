@@ -20,6 +20,7 @@ Route::group([
             'prefix' => 'user',
             // 'middleware' => ['admin_permission'],
             // 'roles' => [700, 500]
+            'skip_com_selection'=>true
         ], function(){
 
             Route::match(['get', 'post'], '/', ['uses' => 'UserController@getUser'])->name('user');
@@ -44,6 +45,36 @@ Route::group([
             // Route::put('/edit/{id}', ['uses' => 'AdminController@putUserEdit']);
 
             // Route::get('/delete/{id}', ['uses' => 'AdminController@getDelete']);
+    });
+
+    //Company
+    Route::group(
+        [
+            'prefix' => 'company',
+            // 'middleware' => ['admin_permission'],
+            // 'roles' => [700, 500]
+        ], function(){
+
+            Route::match(['get', 'post'], '/', ['uses' => 'CompanyController@getCompany'])->name('company');
+
+            Route::match(['get', 'post'], '/edit/{id}', ['uses' => 'CompanyController@getCompany'])->name('company-edit');
+            
+            // Route::match(['get', 'post'], '/assign-user/{id}', ['uses' => 'CompanyController@getAssignUser'])->name('user-assign-company');
+
+            Route::post('/create', ['uses' => 'CompanyController@postCreateCompany'])->name('company-post-create');
+ 
+            Route::put('/edit/{id?}', ['uses' => 'CompanyController@putEditCompany'])->name('company-put-edit');
+
+            Route::get('/status/{id}', ['uses' => 'CompanyController@getChangeStatus'])->name('company-get-status');
+
+            Route::get('/select', ['skip_com_selection'=>true, 'uses' => 'CompanyController@getSelectCompany'])->name('company-get-select');
+
+            Route::post('/select', ['skip_com_selection'=>true, 'uses' => 'CompanyController@postSelectCompany'])->name('company-post-select');
+
+            // Route::post('/assign-company/{id?}', ['uses' => 'UserController@postAssignCompany'])->name('user-post-assign');
+
+
+           
     });
 
     // Mappings Item

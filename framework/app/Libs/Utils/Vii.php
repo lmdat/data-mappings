@@ -131,6 +131,9 @@ class Vii{
     
     public static function queryStringBuilder($items){
         
+        if($items == null)
+            return '';
+
         if(is_string($items)){
             return sprintf('?%s', $items);    
         }
@@ -156,6 +159,7 @@ class Vii{
         if(is_array($empty))
             $rs = $empty;
         
+        $seperate_text = ' | ';
         foreach($data as $k => $v){
             
             if(is_array($field_text)){
@@ -163,7 +167,7 @@ class Vii{
                 foreach($field_text as $f)
                     $text[] = $v[$f];
 
-                $rs[$v[$field_value]] = implode(' | ', $text);
+                $rs[$v[$field_value]] = implode($seperate_text, $text);
             }
             else{
                 $rs[$v[$field_value]] = $v[$field_text];

@@ -43,6 +43,37 @@ trait SidebarMenuTrait{
                 ],
             ],
 
+            [
+                'id' => '',
+                'text' => trans($lang_mod . '.company'),
+                'url' => '#',
+                'params' => [],
+                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
+                'children' => [
+                    
+                    [
+                        'id' => '31',
+                        'text' => trans($lang_mod . '.add_company'),
+                        'url' => 'company',//'admin/users',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right' aria-hidden='true'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
+                    [
+                        'id' => '31',
+                        'text' => trans($lang_mod . '.select_company'),
+                        'url' => 'company/select',//'admin/users',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right' aria-hidden='true'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ]
+
+                ],
+            ],
+
             // [
             //     'id' => '',
             //     'text' => trans($lang_mod . '.product_management'),
