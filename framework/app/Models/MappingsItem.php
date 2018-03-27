@@ -50,20 +50,22 @@ class MappingsItem extends Model{
 
 
     /*----- BACKEND FUNCTION -----*/
-    public static function getRootParentList(){
+    public static function getRootParentList($com_id=null){
 
         $fields = ['id', 'parent_id', 'item_name', 'type_id'];
 
-        $root_parent = MappingsItem::where('parent_id', 0)
-            //->where('published', '>=', 0)
-            ->select($fields)
+        $sql = MappingsItem::where('parent_id', 0);
+        if($com_id != null)
+            $sql->where('company_id', $com_id);
+        
+        $root_parent = $sql->select($fields)
             ->orderBy('item_name', 'ASC')
             ->get();
-
+        
         return $root_parent;
     }
     
-    public static function createTreeList($parents, $fields=[], $is_trait=false){
+    public static function createTreeList($parents, $fields=[], $com_id=null, $is_trait=false){
         
         if(empty($parents))
             return [];
@@ -75,11 +77,21 @@ class MappingsItem extends Model{
 
             $list[] = $parent;
 
-            $children = $parent->children()->select($fields)
-                ->orderBy('item_name', 'ASC')
-                ->get();
+            $children = null;
+            if($com_id == null){
+                $children = $parent->children()->select($fields)
+                    ->orderBy('item_name', 'ASC')
+                    ->get();
+            }
+            else{
+                $children = $parent->children()->where('company_id', $com_id)
+                    ->select($fields)
+                    ->orderBy('item_name', 'ASC')
+                    ->get();
+            }
+            
 
-            $arr_children =  self::createChildrenList($children, $parent, $is_trait);
+            $arr_children =  self::createChildrenList($children, $parent, $com_id, $is_trait);
 
             $list = array_merge($list, $arr_children);
 
@@ -91,7 +103,7 @@ class MappingsItem extends Model{
         
     }
     
-    private static function createChildrenList($children=[], $parent, $is_trait=false, $h=1){
+    private static function createChildrenList($children=[], $parent, $com_id, $is_trait=false, $h=1){
         
         if(empty($children))
             return [];
@@ -117,9 +129,17 @@ class MappingsItem extends Model{
 
             $list[] = $item;
 
-            $temp_children = $item->children();
+            $temp_children = null;
+            if($com_id == null){
+                $temp_children = $item->children();
+            }
+            else{
+                $temp_children = $item->children()->where('company_id', $com_id)->get();
+            }
+            
+
             if($temp_children != null){
-                $arr_children = self::createChildrenList($temp_children, $item->id, $h + 1);
+                $arr_children = self::createChildrenList($temp_children, $item->id, $com_id,  $is_trait, $h + 1);
                 $list = array_merge($list, $arr_children);
             }
 

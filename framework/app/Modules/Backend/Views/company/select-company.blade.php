@@ -14,7 +14,7 @@
 
 <div class="row justify-content-center">
    
-    <div class="col-md-4">
+    <div class="col-md-6">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'comForm', 'id' => 'comForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">

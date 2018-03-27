@@ -7,40 +7,38 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i>Mount Accounts to Item</h1>
-        <p>Glue Account Code To Item Code</p>
+        <h1><i class="fa fa-location-arrow"></i>Mount Ledger Key to Item</h1>
+        <p>Glue Item Code with Ledger Key</p>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-7">
-        @include('Backend::mappings-item.list-define-item', ['entries' => $entries, 'qs' => $qs, 'curr_id' => $item->id])
-    </div>
-
-    <div class="col-md-5">
-        {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'itemForm', 'id' => 'itemForm', 'role' => 'form', 'files' => false]) !!}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'itemForm', 'id' => 'itemForm', 'role' => 'form', 'files' => true]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Mount Account
+                Quick Import
+                @if(session()->has('error-message'))
+                    <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
+                @endif
+
+                @if(session()->has('success-message'))
+                    <small><label class="badge badge-success">Yeah! {{ session()->get('success-message') }}</label></small>
+                @endif
             </h4>
             <div class="tile-body">
+                <div class="form-group">
+                    <label class="control-label">Data File(xlsx, csv)</label>
+                    {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
+                    <small class="form-text text-muted">Order of Column: MAPPING_ITEM_ID | LEDGER_KEY</small>
+                </div>  
+                <div class="animated-checkbox">
+                    <label>
+                        {!! Form::checkbox('skip_headers', '1', false, ['id' => 'chk_skip']) !!}<span class="label-text">Skip first line for headers?</span>
+                    </label>
+                </div>   
                 
-                <div class="form-group">
-                    <label class="control-label">Item</label>
-                    {!! Form::text('item_name', $item->id . ' - ' . $item->item_name, ['id'=>'item_name', 'class' => 'form-control', 'readonly' => true]) !!}
-                </div>
-
-                <div class="form-group">
-                    <label class="control-label">Account to Mount</label>
-                <?php
-                    $arr_selected = [];
-                    $accounts = $item->accounts()->orderBy('account_code', 'DESC')->get();
-                    foreach($accounts as $acc){
-                        $arr_selected[] = $acc->account_code;
-                    }
-                ?>
-                    {!! Form::select('mounted_account[]', $account_list, $arr_selected, ['class' => 'form-control', 'id' => 'mounted_account', "multiple"=>true]) !!}
-                </div>
+                
                 
             </div>
             <div class="tile-footer text-right">
@@ -49,7 +47,7 @@
             </div>
             
         </div>
-        {!! Form::hidden('item_id', $item->id) !!}
+        
         {!! Form::close() !!}
     </div>
 </div>
@@ -67,9 +65,9 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
-        $('#mounted_account').select2({
-            width: '100%'
-        });
+        // $('#mounted_account').select2({
+        //     width: '100%'
+        // });
     })
 </script>
 @stop

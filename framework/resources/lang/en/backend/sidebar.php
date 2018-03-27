@@ -24,7 +24,7 @@ return [
     'mappings_item' => 'Mappings Item',
         'define_mappings_item' => 'Define Item',
         'item_attribute' => 'Item Attribute',
-        'mappings_item_account' => 'Mount Account to Item',
+        'mappings_item_account' => 'Mount Ledger to Item',
     
 
     'mapping_item' => 'Mapping Item',

@@ -17,7 +17,8 @@
                             <th>Code</th>
                             <th>Item Name</th>
                             <th>Type</th>
-                             <th></th>
+                            <th>Ledger Key</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -26,6 +27,23 @@
                             <td>{{ $item->id }}</td>
                             <td>{!! $item->tmp_name !!}</td>
                             <td>{{ $item->mappings_type->type_name }}</td>
+                            <td>
+                            <?php
+                                //$ledgers = $item->with('ledger_item')->get();
+                                $pivot = [];
+                                if($item->is_leaf == 1){
+                                    $pivot = DB::table('ledger_item')->where('mappings_code', $item->id)
+                                        ->where('company_id', session()->get('selected_company'))
+                                        ->get();
+                                }
+                                $n = count($pivot);
+                            ?>
+                            @for($i=0; $i<$n; $i++)
+                            <i class="fa fa-check-square-o"></i><small>{{$pivot[$i]->ledger_code}}</small>@if($i < $n - 1)&nbsp;@endif
+                                @if($i % $n == 2) <br/> @endif
+                            @endfor
+                            
+                            </td>
                             <td>
                                 <a href="{{ route('mappings-item-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
                             {{--  @if($item->is_leaf == 1)

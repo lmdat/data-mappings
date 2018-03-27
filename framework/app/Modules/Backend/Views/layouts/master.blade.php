@@ -22,7 +22,7 @@
 
         <ul class="app-nav">
             <!-- User Menu-->
-            <li><a id="select_company" class="app-nav__item" href="javascript:void(0)" data-toggle="dropdown">Working Company: {{session()->get('selected_company_name', 'None')}}</a></li>
+            <li><a id="select_company" class="app-nav__item" href="javascript:void(0)" data-toggle="dropdown">Handle data for company: {{session()->get('selected_company_name', 'None')}}</a></li>
             <li class="dropdown"><a class="app-nav__item" href="javascript:void(0)" data-toggle="dropdown"><i class="fa fa-user fa-lg"></i></a>
                 <ul class="dropdown-menu settings-menu dropdown-menu-right">
                     <li><a class="dropdown-item" href="#"><i class="fa fa-cog fa-lg"></i> Settings</a></li>

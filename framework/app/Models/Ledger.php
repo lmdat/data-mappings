@@ -30,7 +30,7 @@ class Ledger extends Model{
     ];
 
     public function items(){
-        return $this->belongsToMany('App\Models\MappingsItem', 'ledger_item', 'ledger_code', 'mapping_code', 'ledger_code');
+        return $this->belongsToMany('App\Models\MappingsItem', 'ledger_item', 'ledger_code', 'mappings_code', 'ledger_code');
     }
 
     public function upload_revision(){

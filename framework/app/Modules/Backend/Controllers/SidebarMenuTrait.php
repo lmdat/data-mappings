@@ -214,15 +214,15 @@ trait SidebarMenuTrait{
                         'children' => []
                     ],
 
-                    // [
-                    //     'id' => '42',
-                    //     'text' => trans($lang_mod . '.mappings_item_account'),
-                    //     'url' => 'mappings-item/mount',
-                    //     'params' => [],
-                    //     'icon' => "<i class='fa fa-angle-double-right'></i>",
-                    //     'level-icon' => "",
-                    //     'children' => []
-                    // ],
+                    [
+                        'id' => '42',
+                        'text' => trans($lang_mod . '.mappings_item_account'),
+                        'url' => 'mappings-item/mount',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
                     
                 ]
             ],

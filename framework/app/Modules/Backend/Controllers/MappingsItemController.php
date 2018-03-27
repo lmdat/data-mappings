@@ -9,10 +9,14 @@ use App\Models\Account;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class MappingsItemController extends Controller{
 
     const LANG_NAME = 'mappings-item';
+
+    // private $companyId;
+    private $mime;
 
     public function __construct(){
         parent::__construct();
@@ -20,6 +24,13 @@ class MappingsItemController extends Controller{
 
         $actions = request()->route()->getAction();
         $this->prefixUrl = $actions['prefix'];
+
+        $this->mime = [
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'xls' => 'application/vnd.ms-excel',
+            'csv' => 'application/vnd.ms-excel'
+        ];
+
     }
 
     public function getItem(Request $request, $id=null){
@@ -31,13 +42,13 @@ class MappingsItemController extends Controller{
         
         $mappings_type = MappingsType::all();
 
-        $root_parent = MappingsItem::getRootParentList();
+        $root_parent = MappingsItem::getRootParentList($this->companyId);
        
         $fields = ['id', 'item_name', 'type_id', 'is_leaf'];
 
         $tree_data = [];
         if(count($root_parent) > 0){
-            $tree_data = MappingsItem::createTreeList($root_parent, $fields, true);
+            $tree_data = MappingsItem::createTreeList($root_parent, $fields, $this->companyId, true);
         }
 
         // Paging
@@ -99,6 +110,7 @@ class MappingsItemController extends Controller{
 
         if($request->get('show_multiple') == null){
             $item = new MappingsItem($form);
+            $item->company_id = $this->companyId;
             $item->is_leaf = 1;
 
             if($item->save()){
@@ -188,34 +200,34 @@ class MappingsItemController extends Controller{
 
     public function getMountAccount(Request $request, $id=null){
         
-        $aqs = $request->except('page'); 
-        // unset($aqs['page']);
+        // $aqs = $request->except('page'); 
+        // // unset($aqs['page']);
         
-        $qs = Vii::queryStringBuilder($aqs);
+        // $qs = Vii::queryStringBuilder($aqs);
         
-        $mappings_type = MappingsType::all();
+        // $mappings_type = MappingsType::all();
 
-        $root_parent = MappingsItem::getRootParentList();
+        // $root_parent = MappingsItem::getRootParentList();
        
-        $fields = ['id', 'item_name', 'type_id', 'is_leaf'];
+        // $fields = ['id', 'item_name', 'type_id', 'is_leaf'];
 
-        $tree_data = [];
-        if(count($root_parent) > 0){
-            $tree_data = MappingsItem::createTreeList($root_parent, $fields, true);
-        }
+        // $tree_data = [];
+        // if(count($root_parent) > 0){
+        //     $tree_data = MappingsItem::createTreeList($root_parent, $fields, true);
+        // }
 
-        // Paging
-        $perPage = 15;
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $col = new Collection($tree_data);
-        $currentPageSearchResults = $col->slice(($currentPage - 1) * $perPage, $perPage)->all();
-        $entries = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
-        $entries->withPath(route('mappings-item', [str_replace('?', '', $qs)]));
+        // // Paging
+        // $perPage = 15;
+        // $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        // $col = new Collection($tree_data);
+        // $currentPageSearchResults = $col->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        // $entries = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
+        // $entries->withPath(route('mappings-item', [str_replace('?', '', $qs)]));
 
-        $item = MappingsItem::findOrFail($id);
+        // $item = MappingsItem::findOrFail($id);
 
-        // Account List
-        $accounts = Account::all();
+        // // Account List
+        // $accounts = Account::all();
 
         //dd($accounts);
 
@@ -223,12 +235,9 @@ class MappingsItemController extends Controller{
         return view(
             'Backend::mappings-item.mount-account-item',
             [
-                'form_uri' => route('account-post-mount', [$id]),
-                'page_title' => 'Mount Account to Item',
-                'entries' => $entries,
+                'form_uri' => route('ledger-post-mount'),
+                'page_title' => 'Mount Ledger Key to Item',
                 'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                'item' => $item,
-                'account_list' => Vii::createOptionData($accounts->toArray(), 'account_code', ['account_name', 'account_code'], null),
                 
                 //'user' => session()->get('test-name', $full_name)
             ]
@@ -236,17 +245,118 @@ class MappingsItemController extends Controller{
     }
 
     public function postMountAccountItem(Request $request, $id=null){
-        $item_id = $request->input('item_id');
-        $accounts = $request->input('mounted_account', []);
-        
-        $item = MappingsItem::findOrFail($item_id);
-        $item->accounts()->detach();
-        if(count($accounts) > 0) 
-            $item->accounts()->attach($accounts);
-        
-        $qs = Vii::queryStringBuilder($request->getQueryString());
-        return redirect()
-                ->route('mappings-item', [str_replace('?', '', $qs)]);
 
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+
+        if($request->hasFile('data_file')){
+            if($request->file('data_file')->isValid()){
+                $ufile = $request->file('data_file');
+                $ext = $this->getTrueFileExtension($ufile);
+                $reader = $this->createReader($ext);
+                $spreadsheet = $reader->load($ufile->path());
+                $rs = $this->insertItemLedger($request, $reader, $spreadsheet, ($ext == 'csv'));
+
+
+                if($rs === false){
+                    return redirect()
+                        ->route('ledger-mount', [str_replace('?', '', $qs)])
+                        ->with('error-message', 'Cannot glue ledger key to item from file. Some errors are occurred!');
+                }
+    
+                               
+                return redirect()
+                        ->route('ledger-mount', [str_replace('?', '', $qs)])
+                        ->with('success-message', "Glue {$rs['ledger']} ledger key to item from file successfully.");
+            }
+        }
+        // $item_id = $request->input('item_id');
+        // $accounts = $request->input('mounted_account', []);
+        
+        // $item = MappingsItem::findOrFail($item_id);
+        // $item->accounts()->detach();
+        // if(count($accounts) > 0) 
+        //     $item->accounts()->attach($accounts);
+        
+        // $qs = Vii::queryStringBuilder($request->getQueryString());
+        // return redirect()
+        //         ->route('mappings-item', [str_replace('?', '', $qs)]);
+
+    }
+
+    private function getTrueFileExtension($ufile){
+
+        $ext = null;
+        if($ufile->getClientMimeType() == $this->mime['xlsx']){   // .xlsx
+            $ext = 'xlsx';
+        }
+        else{
+            if($ufile->getClientOriginalExtension() == $this->mime['xls']){    // .xls
+                $ext = 'xls';
+            }
+            else{   // .csv
+                $ext = 'csv';
+            }
+        }
+        return $ext;
+    }
+
+    private function createReader($ext){
+       
+        $reader = null;
+       
+        if($ext == 'xlsx'){   // .xlsx
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        }
+        else if($ext == 'xls'){
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        }
+        else{
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+        }
+
+        return $reader;
+    }
+
+    private function insertItemLedger($request, $reader, $spreadsheet, $is_csv=false){
+        $worksheet = $spreadsheet->getActiveSheet();
+        $highestRow = $worksheet->getHighestRow(); // e.g. 10
+        $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        $data = [];
+        for($row=1; $row<=$highestRow; $row++){
+            if($row == 1 && $request->post('skip_headers') != null)
+                continue;
+
+            $item_id = trim($worksheet->getCellByColumnAndRow(1, $row)->getValue());
+            $ledger_key = str_replace(['_#BLANK#'], '', trim($worksheet->getCellByColumnAndRow(2, $row)->getValue()));
+
+            $data[] = [
+                'mappings_code' => $item_id,
+                'ledger_code' => $ledger_key,
+                'company_id' => $this->companyId
+            ];
+        }
+
+        //dd($data);
+        $rs = [
+            'ledger' => 0
+        ];
+
+        $done = true;
+        
+        if(count($data) > 0){
+            foreach(collect($data)->chunk(100) as $subset){
+                $done = $done & DB::table('ledger_item')->insert($subset->toArray());
+            }
+
+            $rs['ledger'] = count($data);
+        }
+
+        if($done){
+            return $rs;
+        }
+
+        return $done;
     }
 }

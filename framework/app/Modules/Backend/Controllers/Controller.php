@@ -23,6 +23,8 @@ class Controller extends BaseController{
 
     protected $prefixUrl;
 
+    protected $companyId;
+
     public function __construct(){
 
         //inject admin authentication
@@ -48,6 +50,8 @@ class Controller extends BaseController{
         $this->middleware(function ($request, $next) {
             view()->share('full_name', $this->guard->user()->first_name . ' ' . $this->guard->user()->last_name);
             view()->share('user_role', $this->guard->user()->getMaxRoleName());
+
+            $this->companyId = session()->get('selected_company');
 
             return $next($request);
         });

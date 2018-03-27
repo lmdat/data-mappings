@@ -12,7 +12,8 @@ class DimensionType extends Model{
     protected $fillable = [
         'type_name',
         'alias',
-        'type_code'
+        'type_code',
+        'company_id'
     ];
 
     protected $guarded = [

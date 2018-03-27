@@ -95,9 +95,9 @@ Route::group([
  
         Route::put('/edit/{id}', ['uses' => 'MappingsItemController@putEditItem'])->name('mappings-item-put-edit');
 
-        Route::match(['get', 'post'], '/mount/{id?}', ['uses' => 'MappingsItemController@getMountAccount'])->name('account-mount');
+        Route::get('/mount', ['uses' => 'MappingsItemController@getMountAccount'])->name('ledger-mount');
 
-        // Route::post('/mount/{id?}', ['uses' => 'MappingsItemController@postMountAccountItem'])->name('account-post-mount');
+        Route::post('/mount', ['uses' => 'MappingsItemController@postMountAccountItem'])->name('ledger-post-mount');
         // Route::post('/ordering', ['uses' => 'CategoryController@postOrderingCategory']);
 
         // Route::get('/published/{id}', ['uses' => 'CategoryController@getPublishedCategory']);

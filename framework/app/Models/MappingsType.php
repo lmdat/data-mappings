@@ -11,7 +11,8 @@ class MappingsType extends Model{
 
     protected $fillable = [
         'type_name',
-        'short_code'
+        'short_code',
+        'company_id'
     ];
 
     protected $guarded = [
