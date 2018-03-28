@@ -8,6 +8,8 @@ use App\Models\Dimension;
 use App\Models\DimensionType;
 use App\Models\Company;
 
+use App\Modules\Backend\Requests\Dimension\DimensionCreateRequest;
+use App\Modules\Backend\Requests\Dimension\DimensionEditRequest;
 
 class DimensionController extends Controller{
     const LANG_NAME = 'dimension';
@@ -83,7 +85,7 @@ class DimensionController extends Controller{
         );
     }
 
-    public function postCreateDimension(Request $request){
+    public function postCreateDimension(DimensionCreateRequest $request){
        
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
@@ -236,16 +238,13 @@ class DimensionController extends Controller{
         return $done;
     }
 
-    // public function welcome(){
+    public function getChangeStatus(Request $request, $id=null){
+        $model = Dimension::findOrFail($id);
+        $val = 1 - $model->status;
+        $model->update(['status'=> $val]);
 
-    //     $full_name = 'Vincent Valentine';//$this->guard->user()->first_name . ' ' . $this->guard->user()->surname;
-        
-    //     return view(
-    //         'Backend::dashboard.welcome',
-    //         [
-    //             'page_title' => 'Dashboard',
-    //             'user' => session()->get('test-name', $full_name)
-    //         ]
-    //     );
-    // }
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+        return redirect()
+                ->route('dimension', [str_replace('?', '', $qs)]);
+    }
 }

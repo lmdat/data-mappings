@@ -117,14 +117,16 @@ class MappingsItem extends Model{
                     $str_indent .= "&nbsp;&nbsp;&nbsp;&nbsp;";
 
                 $str_indent .= "&#8627;&nbsp;&nbsp;&nbsp;&nbsp;";
-                //$str_indent .= "&#10551;&nbsp;&nbsp;&nbsp;&nbsp;";
+                // $str_indent .= "&#10551;&nbsp;&nbsp;&nbsp;&nbsp;";
+                
 
                 $item->tmp_name = $str_indent . $item->tmp_name;
 
             }
             else{
                 //$item->cat_name = $parent->cat_name . '&nbsp;&#10097;&nbsp;' . $item->cat_name;
-                $item->tmp_name = $parent->tmp_name . '&nbsp;&#10148;&nbsp;' . $item->tmp_name;
+                // $item->tmp_name = $parent->tmp_name . '&nbsp;&#10148;&nbsp;' . $item->tmp_name;
+                $item->tmp_name = $parent->tmp_name . '&nbsp;&rarr;&nbsp;' . $item->tmp_name;
             }
 
             $list[] = $item;

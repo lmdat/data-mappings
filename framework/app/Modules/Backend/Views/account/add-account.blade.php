@@ -40,12 +40,14 @@
                 <div class="form-group row">
                     <div class="col-md-6">
                         <label class="control-label">Account Code</label>
-                        {!! Form::text('account_code', '', ['id'=>'account_code', 'class' => 'form-control']) !!}
+                        {!! Form::text('account_code', '', ['id'=>'account_code', 'class' => 'form-control', 'autofocus', 'required']) !!}
+                        @if ($errors->has('account_code'))<p class="text-danger"><small>{!!$errors->first('account_code')!!}</small></p> @endif
                    </div>
 
                    <div class="col-md-6">
                          <label class="control-label">Account Name</label>
-                         {!! Form::text('account_name', '', ['id'=>'account_name', 'class' => 'form-control']) !!}
+                         {!! Form::text('account_name', '', ['id'=>'account_name', 'class' => 'form-control', 'required']) !!}
+                         @if ($errors->has('account_name'))<p class="text-danger"><small>{!!$errors->first('account_name')!!}</small></p> @endif
                    </div>
                 </div>
 
@@ -57,9 +59,10 @@
 
                 <div id='file_upload' class="col-md-12">
                     <div class="form-group">
-                        <label class="control-label">Data File(xlsx, csv)</label>
-                        {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
+                        <label class="control-label">Data File(xls, xlsx, csv)</label>
+                        {!! Form::file('data_file', ['id'=>'data_file', 'accept'=>'.csv, .xls, .xlsx', 'class' => 'form-control']) !!}
                         <small class="form-text text-muted">The order of colunms: <strong>ACCOUNT-CODE;ACCOUNT-NAME</strong></small>
+                        @if ($errors->has('data_file'))<p class="text-danger"><small>{!!$errors->first('data_file')!!}</small></p> @endif
                     </div>
 
                     <div class="animated-checkbox">
@@ -87,7 +90,17 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
-        $('#file_upload').hide()
+        
+        if($('#chk_show_multiple').is(':checked')){
+            $('#file_upload').show();
+            $('#account_code').attr('disabled', true);
+            $('#account_name').attr('disabled', true);
+        }
+        else{
+            $('#account_code').attr('disabled', false);
+            $('#account_name').attr('disabled', false);
+            $('#file_upload').hide();
+        }
         $('#chk_show_multiple').on('click', function(){
             if($(this).is(':checked')){
                 $('#account_code').attr('disabled', true);

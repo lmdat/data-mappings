@@ -34,12 +34,14 @@
                 <div class="form-group">
                     <label class="control-label">Mappings Type</label>
                     {!! Form::select('type_id', $type_list, '', ['class' => 'form-control', 'id' => 'type_id']) !!}
+                    @if ($errors->has('type_id'))<p class="text-danger"><small>{!!$errors->first('type_id')!!}</small></p> @endif  
                     
                 </div>
 
                 <div class="form-group">
                     <label class="control-label">Parent Id</label>
                     {!! Form::select('parent_id', $tree_data, '', ['class' => 'form-control', 'id' => 'parent_id']) !!}
+                    @if ($errors->has('parent_id'))<p class="text-danger"><small>{!!$errors->first('parent_id')!!}</small></p> @endif  
                     
                 </div>
 
@@ -47,11 +49,13 @@
                     <div class="col-md-6">
                         <label class="control-label">Item Name</label>
                         {!! Form::text('item_name', '', ['id'=>'item_name', 'class' => 'form-control']) !!}
+                        @if ($errors->has('item_name'))<p class="text-danger"><small>{!!$errors->first('item_name')!!}</small></p> @endif  
                    </div>
 
                    <div class="col-md-6">
                          <label class="control-label">Short Name</label>
                          {!! Form::text('short_name', '', ['id'=>'short_name', 'class' => 'form-control']) !!}
+                         @if ($errors->has('short_name'))<p class="text-danger"><small>{!!$errors->first('short_name')!!}</small></p> @endif  
                    </div>
                 </div>
 
@@ -65,6 +69,7 @@
                     <div class="form-group">
                         <small class="form-text text-muted">Use the fotmat: ITEM_NAME|SHORT_NAME or just ITEM_NAME</small>
                         {!! Form::textarea('multiple_item', '', ['id'=>'multiple_item', 'class' => 'form-control', 'placeholder' => 'ITEM_NAME|SHORT_NAME or just ITEM_NAME']) !!}
+                        @if ($errors->has('multiple_item'))<p class="text-danger"><small>{!!$errors->first('multiple_item')!!}</small></p> @endif  
                     </div>
                 </div>
             </div>
@@ -81,7 +86,18 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
-        $('#multiple_item_container').hide()
+        
+        if($('#chk_show_multiple').is(':checked')){
+            $('#multiple_item_container').show();
+            $('#item_name').attr('disabled', true);
+            $('#short_name').attr('disabled', true);
+        }
+        else{
+            $('#item_name').attr('disabled', false);
+            $('#short_name').attr('disabled', false);
+            $('#multiple_item_container').hide();
+        }
+
         $('#chk_show_multiple').on('click', function(){
             if($(this).is(':checked')){
                 $('#item_name').attr('disabled', true);

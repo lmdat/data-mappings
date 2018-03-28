@@ -30,10 +30,10 @@
                         <td>
                         @if($item->status == 1)
                             {{--  <span class="badge badge-info">On</span>  --}}
-                            <a href="#" class="badge badge-info">On</a>
+                            <a href="{{ route('dimension-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-info">On</a>
                         @else
                             {{--  <span class="badge badge-secondary">Off</span>  --}}
-                            <a href="#" class="badge badge-secondary">Off</a>
+                            <a href="{{ route('dimension-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-secondary">Off</a>
                         @endif
                         </td>
                         <td>

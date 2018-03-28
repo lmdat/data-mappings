@@ -7,6 +7,8 @@ use App\Libs\Utils\Vii;
 use App\Models\Account;
 use App\Models\Company;
 
+use App\Modules\Backend\Requests\Account\AccountCreateRequest;
+use App\Modules\Backend\Requests\Account\AccountEditRequest;
 
 class AccountController extends Controller{
     const LANG_NAME = 'account';
@@ -77,7 +79,7 @@ class AccountController extends Controller{
         );
     }
 
-    public function postCreateAccount(Request $request){
+    public function postCreateAccount(AccountCreateRequest $request){
        
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
@@ -128,7 +130,7 @@ class AccountController extends Controller{
         
     }
 
-    public function putEditAccount(Request $request, $id=null){
+    public function putEditAccount(AccountEditRequest $request, $id=null){
         $id = $request->post('id');
 
         $form = $request->only(['account_code', 'account_name']);
@@ -193,16 +195,13 @@ class AccountController extends Controller{
         return $done;
     }
 
-    // public function welcome(){
+    public function getChangeStatus(Request $request, $id=null){
+        $model = Account::findOrFail($id);
+        $val = 1 - $model->status;
+        $model->update(['status'=> $val]);
 
-    //     $full_name = 'Vincent Valentine';//$this->guard->user()->first_name . ' ' . $this->guard->user()->surname;
-        
-    //     return view(
-    //         'Backend::dashboard.welcome',
-    //         [
-    //             'page_title' => 'Dashboard',
-    //             'user' => session()->get('test-name', $full_name)
-    //         ]
-    //     );
-    // }
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+        return redirect()
+                ->route('account', [str_replace('?', '', $qs)]);
+    }
 }

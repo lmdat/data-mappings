@@ -40,6 +40,7 @@
                 <div class="form-group">
                     <label class="control-label">Dimension Type</label>
                     {!! Form::select('dim_type', $type_list, '', ['class' => 'form-control', 'id' => 'dim_type']) !!}
+                    @if ($errors->has('dim_type'))<p class="text-danger"><small>{!!$errors->first('dim_type')!!}</small></p> @endif
                     
                 </div>
 
@@ -47,11 +48,13 @@
                     <div class="col-md-6">
                         <label class="control-label">Dimension Code</label>
                         {!! Form::text('dim_code', '', ['id'=>'dim_code', 'class' => 'form-control']) !!}
+                        @if ($errors->has('dim_code'))<p class="text-danger"><small>{!!$errors->first('dim_code')!!}</small></p> @endif
                    </div>
 
                    <div class="col-md-6">
                          <label class="control-label">Dimension Name</label>
                          {!! Form::text('dim_name', '', ['id'=>'dim_name', 'class' => 'form-control']) !!}
+                         @if ($errors->has('dim_name'))<p class="text-danger"><small>{!!$errors->first('dim_name')!!}</small></p> @endif
                    </div>
                 </div>
 
@@ -63,9 +66,10 @@
 
                 <div id='file_upload' class="col-md-12">
                     <div class="form-group">
-                        <label class="control-label">Data File(xlsx, csv)</label>
-                        {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
+                        <label class="control-label">Data File(xls, xlsx, csv)</label>
+                        {!! Form::file('data_file', ['id'=>'data_file', 'accept'=>'.csv, .xls, .xlsx', 'class' => 'form-control']) !!}
                         <small class="form-text text-muted">The order of colunms: <strong>DIMENSION-CODE;DIMENSION-NAME</strong></small>
+                        @if ($errors->has('data_file'))<p class="text-danger"><small>{!!$errors->first('data_file')!!}</small></p> @endif
                     </div>
 
                     <div class="animated-checkbox">
@@ -93,7 +97,16 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
-        $('#file_upload').hide()
+        if($('#chk_show_multiple').is(':checked')){
+            $('#file_upload').show();
+            $('#dim_code').attr('disabled', true);
+            $('#dim_name').attr('disabled', true);
+        }
+        else{
+            $('#dim_code').attr('disabled', false);
+            $('#dim_name').attr('disabled', false);
+            $('#file_upload').hide();
+        }
         $('#chk_show_multiple').on('click', function(){
             if($(this).is(':checked')){
                 $('#dim_code').attr('disabled', true);

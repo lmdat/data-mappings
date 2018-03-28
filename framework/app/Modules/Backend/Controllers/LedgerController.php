@@ -13,6 +13,8 @@ use App\Models\Ledger;
 use App\Models\UploadLedger;
 use App\Models\UploadRevision;
 
+use App\Modules\Backend\Requests\Ledger\LedgerImportRequest;
+
 
 class LedgerController extends Controller{
     const LANG_NAME = 'ledger';
@@ -208,111 +210,111 @@ class LedgerController extends Controller{
                     ->route('revision', [str_replace('?', '', $qs)]);
     }
 
-    public function postCreateDimension(Request $request){
+    // public function postCreateDimension(Request $request){
        
-        $qs = Vii::queryStringBuilder($request->getQueryString());
+    //     $qs = Vii::queryStringBuilder($request->getQueryString());
 
-        if($request->get('show_multiple') == null){
-            $form = $request->only(['dim_name', 'dim_code', 'company_id', 'dim_type']);
-            $dim = new Dimension($form);
-            $dim->status = 1;
+    //     if($request->get('show_multiple') == null){
+    //         $form = $request->only(['dim_name', 'dim_code', 'company_id', 'dim_type']);
+    //         $dim = new Dimension($form);
+    //         $dim->status = 1;
 
-            if($dim->save()){
-                return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('success-message', "1 dimension is created.");
-            }
+    //         if($dim->save()){
+    //             return redirect()
+    //                 ->route('dimension', [str_replace('?', '', $qs)])
+    //                 ->with('success-message', "1 dimension is created.");
+    //         }
 
-            // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
-            return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('error-message', 'Cannot create new dimension.');
-        }
-        else{
-            // $accounts = explode("\r\n", $request->get('multiple_account'));
-            // $data = [];
-            // foreach($accounts as $account){
-            //     $a = explode('|', $account);
-            //     $_name = "";
-            //     $_code = "";
-            //     if(count($a) == 1){
-            //         $_code = $a[0];
-            //     }
-            //     else{
-            //         $_code = $a[0];
-            //         $_name = $a[1];
-            //     }
+    //         // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
+    //         return redirect()
+    //                 ->route('dimension', [str_replace('?', '', $qs)])
+    //                 ->with('error-message', 'Cannot create new dimension.');
+    //     }
+    //     else{
+    //         // $accounts = explode("\r\n", $request->get('multiple_account'));
+    //         // $data = [];
+    //         // foreach($accounts as $account){
+    //         //     $a = explode('|', $account);
+    //         //     $_name = "";
+    //         //     $_code = "";
+    //         //     if(count($a) == 1){
+    //         //         $_code = $a[0];
+    //         //     }
+    //         //     else{
+    //         //         $_code = $a[0];
+    //         //         $_name = $a[1];
+    //         //     }
 
-            //     $data[] = [
-            //         'account_name' => trim($_name),
-            //         'account_code' => trim($_code),
-            //         'status' => 1
-            //     ];
+    //         //     $data[] = [
+    //         //         'account_name' => trim($_name),
+    //         //         'account_code' => trim($_code),
+    //         //         'status' => 1
+    //         //     ];
 
-            // }
+    //         // }
 
-            // request()->validate([
-            //     'data_file' => 'required|mimes:csv,xslx|max:1024',
-            // ]);
+    //         // request()->validate([
+    //         //     'data_file' => 'required|mimes:csv,xslx|max:1024',
+    //         // ]);
 
-            $ufile = $request->file('data_file');
-            $arr = file($ufile->path());
-            if($request->post('skip_first_line') != null)
-                array_shift($arr);
+    //         $ufile = $request->file('data_file');
+    //         $arr = file($ufile->path());
+    //         if($request->post('skip_first_line') != null)
+    //             array_shift($arr);
 
-            // $arr = array_unique($arr);
-            // dd($arr);
-            $data = [];
-            foreach($arr as $item){
-                $a = explode(';', $item);
-                $_code = trim($a[0]);
-                $_name = trim($a[1]);
-                if(array_key_exists($_code, $data) || $_code == '')
-                    continue;
+    //         // $arr = array_unique($arr);
+    //         // dd($arr);
+    //         $data = [];
+    //         foreach($arr as $item){
+    //             $a = explode(';', $item);
+    //             $_code = trim($a[0]);
+    //             $_name = trim($a[1]);
+    //             if(array_key_exists($_code, $data) || $_code == '')
+    //                 continue;
                     
-                $data[$_code] = [
-                    'dim_code' => $_code,
-                    'dim_name' => $_name,
-                    'company_id' => intval($request->post('company_id')),
-                    'dim_type' => intval($request->post('dim_type')),
-                    'status' => 1
-                ];
-            }
+    //             $data[$_code] = [
+    //                 'dim_code' => $_code,
+    //                 'dim_name' => $_name,
+    //                 'company_id' => intval($request->post('company_id')),
+    //                 'dim_type' => intval($request->post('dim_type')),
+    //                 'status' => 1
+    //             ];
+    //         }
 
-            if(Dimension::insert($data)){
-                $c = count($data);
+    //         if(Dimension::insert($data)){
+    //             $c = count($data);
                 
-                return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('success-message', "{$c} dimensions are created.");
-            }
+    //             return redirect()
+    //                 ->route('dimension', [str_replace('?', '', $qs)])
+    //                 ->with('success-message', "{$c} dimensions are created.");
+    //         }
 
-            // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
-            return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('error-message', 'Cannot create new dimensions.');
-        }
+    //         // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
+    //         return redirect()
+    //                 ->route('dimension', [str_replace('?', '', $qs)])
+    //                 ->with('error-message', 'Cannot create new dimensions.');
+    //     }
         
-    }
+    // }
 
-    public function putEditDimension(Request $request, $id=null){
-        $id = $request->post('id');
+    // public function putEditDimension(Request $request, $id=null){
+    //     $id = $request->post('id');
 
-        $form = $request->only(['dim_code', 'dim_name', 'company_id', 'dim_type']);
+    //     $form = $request->only(['dim_code', 'dim_name', 'company_id', 'dim_type']);
         
-        $dim = Dimension::findOrFail($id);
+    //     $dim = Dimension::findOrFail($id);
 
-        $qs = Vii::queryStringBuilder($request->getQueryString());
-        if($dim->update($form)){
-            return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('success-message', "Dimension[with code={$dim->dim_code}] is updated.");
-        }
+    //     $qs = Vii::queryStringBuilder($request->getQueryString());
+    //     if($dim->update($form)){
+    //         return redirect()
+    //                 ->route('dimension', [str_replace('?', '', $qs)])
+    //                 ->with('success-message', "Dimension[with code={$dim->dim_code}] is updated.");
+    //     }
 
-        return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('error-message', "Cannot update dimension[with code={$dim->dim_code}].");
-    }
+    //     return redirect()
+    //                 ->route('dimension', [str_replace('?', '', $qs)])
+    //                 ->with('error-message', "Cannot update dimension[with code={$dim->dim_code}].");
+    // }
 
     public function getImportLedger(Request $request, $step=1){
         
@@ -434,7 +436,7 @@ class LedgerController extends Controller{
 
     }
 
-    public function postImportLedger(Request $request){
+    public function postImportLedger(ImportLedgerRequest $request){
         $step = $request->post('step', 0);
 
         if($step == 0){

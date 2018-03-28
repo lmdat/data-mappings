@@ -33,25 +33,26 @@
             <div class="tile-body">
                 <div class="form-group">
                     <label class="control-label">Mappings Type</label>
-                    {!! Form::select('type_id', $type_list, $item->type_id, ['class' => 'form-control', 'id' => 'type_id']) !!}
-                    
+                    {!! Form::select('type_id', $type_list, $item->type_id, ['class' => 'form-control', 'id' => 'type_id', 'required']) !!}
+                    @if ($errors->has('type_id'))<p class="text-danger"><small>{!!$errors->first('type_id')!!}</small></p> @endif  
                 </div>
 
                 <div class="form-group">
                     <label class="control-label">Parent Id</label>
                     {!! Form::select('parent_id', $tree_data, $item->parent_id, ['class' => 'form-control', 'id' => 'parent_id']) !!}
-                    
                 </div>
 
                 <div class="form-group row">
                     <div class="col-md-6">
                         <label class="control-label">Item Name</label>
-                        {!! Form::text('item_name', $item->item_name, ['id'=>'item_name', 'class' => 'form-control']) !!}
+                        {!! Form::text('item_name', $item->item_name, ['id'=>'item_name', 'class' => 'form-control', 'required']) !!}
+                        @if ($errors->has('item_name'))<p class="text-danger"><small>{!!$errors->first('item_name')!!}</small></p> @endif  
                    </div>
 
                    <div class="col-md-6">
                          <label class="control-label">Short Name</label>
-                         {!! Form::text('short_name', $item->short_name, ['id'=>'short_name', 'class' => 'form-control']) !!}
+                         {!! Form::text('short_name', $item->short_name, ['id'=>'short_name', 'class' => 'form-control', 'required']) !!}
+                         @if ($errors->has('short_name'))<p class="text-danger"><small>{!!$errors->first('short_name')!!}</small></p> @endif  
                    </div>
                 </div>
 

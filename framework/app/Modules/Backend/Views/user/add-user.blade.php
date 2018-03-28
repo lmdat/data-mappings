@@ -34,38 +34,41 @@
                
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">First Name</label>
+                        <label class="control-label">First Name <span class="text-danger">*</span></label>
                         {!! Form::text('first_name', '', ['id'=>'first_name', 'class' => 'form-control', 'autofocus']) !!}
+                        @if ($errors->has('first_name'))<p class="text-danger"><small>{!!$errors->first('first_name')!!}</small></p> @endif
                    </div>
 
                    <div class="col-md-6">
-                         <label class="control-label">Last Name</label>
+                         <label class="control-label">Last Name <span class="text-danger">*</span></label>
                          {!! Form::text('last_name', '', ['id'=>'last_name', 'class' => 'form-control']) !!}
+                         @if ($errors->has('last_name'))<p  class="text-danger"><small>{!!$errors->first('last_name')!!}</small></p> @endif
                    </div>
                 </div>
 
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">Email</label>
+                        <label class="control-label">Email <span class="text-danger">*</span></label>
                         {!! Form::email('email', '', ['id'=>'email', 'class' => 'form-control']) !!}
+                        @if ($errors->has('email'))<p  class="text-danger"><small>{!!$errors->first('email')!!}</small></p> @endif
                     </div>
 
                     <div class="col-md-6">
-                        <label class="control-label">Password</label>
+                        <label class="control-label">Password <span class="text-danger">*</span></label>
                         {!! Form::password('password', ['id'=>'password', 'class' => 'form-control']) !!}
-                        
+                        @if ($errors->has('password'))<p  class="text-danger"><small>{!!$errors->first('password')!!}</small></p> @endif
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="control-label">Role</label>
+                    <label class="control-label">Role <span class="text-danger">*</span></label>
                     <select id="role_id" name="role_id" class="form-control">
                         <option value="" selected>---</option>
                         @foreach($roles as $role)
                         <option value="{{$role->id}}" @if(in_array($role->power, $disabled_roles)) disabled @endif>{{ $role->role_name }}</option>
                         @endforeach
                     </select>
-                    
+                    @if ($errors->has('role_id'))<p class="text-danger"><small>{!!$errors->first('role_id')!!}</small></p> @endif                    
                     {{--  {!! Form::select('role_id', $roles, '', ['class' => 'form-control', 'id' => 'company_id']) !!}  --}}
                     
                 </div>

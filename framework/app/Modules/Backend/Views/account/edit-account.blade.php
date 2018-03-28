@@ -44,8 +44,9 @@
                     </div>
 
                     <div class="col-md-6">
-                            <label class="control-label">Account Name</label>
-                            {!! Form::text('account_name', $account->account_name, ['id'=>'account_name', 'class' => 'form-control']) !!}
+                        <label class="control-label">Account Name</label>
+                        {!! Form::text('account_name', $account->account_name, ['id'=>'account_name', 'class' => 'form-control', 'required']) !!}
+                        @if ($errors->has('account_name'))<p class="text-danger"><small>{!!$errors->first('account_name')!!}</small></p> @endif
                     </div>
                 </div>
 

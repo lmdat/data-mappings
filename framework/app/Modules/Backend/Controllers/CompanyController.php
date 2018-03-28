@@ -8,6 +8,10 @@ use App\Models\Company;
 use App\Models\User;
 use App\Models\Role;
 
+use App\Modules\Backend\Requests\Company\CompanyCreateRequest;
+use App\Modules\Backend\Requests\Company\CompanyEditRequest;
+
+
 class CompanyController extends Controller{
     const LANG_NAME = 'company';
 
@@ -148,7 +152,7 @@ class CompanyController extends Controller{
                 ->route('dashboard');
     }
 
-    public function postCreateCompany(Request $request){
+    public function postCreateCompany(CompanyCreateRequest $request){
        
         $qs = Vii::queryStringBuilder($request->getQueryString());
         $form = $request->only(['company_name', 'short_name', 'phone', 'mobile']);
@@ -173,7 +177,7 @@ class CompanyController extends Controller{
         
     }
 
-    public function putEditCompany(Request $request, $id=null){
+    public function putEditCompany(CompanyEditRequest $request, $id=null){
         $id = $request->post('id');
 
         $form = $request->only(['company_name', 'short_name', 'phone', 'mobile']);
@@ -200,16 +204,13 @@ class CompanyController extends Controller{
                     ->with('error-message', "Cannot update Company.");
     }
 
-    // public function welcome(){
+    public function getChangeStatus(Request $request, $id=null){
+        $model = Company::findOrFail($id);
+        $val = 1 - $model->status;
+        $model->update(['status'=> $val]);
 
-    //     $full_name = 'Vincent Valentine';//$this->guard->user()->first_name . ' ' . $this->guard->user()->surname;
-        
-    //     return view(
-    //         'Backend::dashboard.welcome',
-    //         [
-    //             'page_title' => 'Dashboard',
-    //             'user' => session()->get('test-name', $full_name)
-    //         ]
-    //     );
-    // }
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+        return redirect()
+                ->route('company', [str_replace('?', '', $qs)]);
+    }
 }

@@ -122,7 +122,7 @@ Route::group([
  
         Route::put('/edit/{id}', ['uses' => 'AccountController@putEditAccount'])->name('account-put-edit');
 
-        
+        Route::get('/status/{id}', ['uses' => 'AccountController@getChangeStatus'])->name('account-get-status');
 
 
     });
@@ -145,7 +145,7 @@ Route::group([
  
         Route::put('/edit/{id}', ['uses' => 'DimensionController@putEditDimension'])->name('dimension-put-edit');
 
-        
+        Route::get('/status/{id}', ['uses' => 'DimensionController@getChangeStatus'])->name('dimension-get-status');
 
 
     });

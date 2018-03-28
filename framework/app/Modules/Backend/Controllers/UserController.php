@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\Company;
 use App\Models\Role;
 
+use App\Modules\Backend\Requests\User\UserCreateRequest;
+use App\Modules\Backend\Requests\User\UserEditRequest;
+
 class UserController extends Controller{
     const LANG_NAME = 'user';
 
@@ -182,7 +185,7 @@ class UserController extends Controller{
         );
     }
 
-    public function postCreateUser(Request $request){
+    public function postCreateUser(UserCreateRequest $request){
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
         $_form = $request->only(['first_name', 'last_name', 'email', 'password', 'role_id']);
@@ -215,7 +218,7 @@ class UserController extends Controller{
                 ->with('error-message', "Cannot create new user.");
     }
 
-    public function putEditUser(Request $request, $id=null){
+    public function putEditUser(UserEditRequest $request, $id=null){
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
         $_form = $request->only(['id', 'first_name', 'last_name', 'email', 'password']);

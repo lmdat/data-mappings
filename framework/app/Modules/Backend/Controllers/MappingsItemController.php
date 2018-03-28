@@ -11,6 +11,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+use App\Modules\Backend\Requests\Item\ItemCreateRequest;
+use App\Modules\Backend\Requests\Item\ItemEditRequest;
+
 class MappingsItemController extends Controller{
 
     const LANG_NAME = 'mappings-item';
@@ -89,7 +92,7 @@ class MappingsItemController extends Controller{
         );
     }
 
-    public function postCreateItem(Request $request){
+    public function postCreateItem(ItemCreateRequest $request){
         $form = $request->only(['parent_id', 'item_name', 'short_name', 'type_id', 'multiple_item']);
 
         // dd($form);
