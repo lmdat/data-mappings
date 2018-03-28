@@ -19,7 +19,7 @@ class LedgerController extends Controller{
 
     private $company_id;
 
-    private $mime;
+    
 
     public function __construct(){
         parent::__construct();
@@ -29,13 +29,9 @@ class LedgerController extends Controller{
         $actions = request()->route()->getAction();
         $this->prefixUrl = $actions['prefix'];
 
-        $this->company_id = 1;
+        $this->companyId = 1;
 
-        $this->mime = [
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'xls' => 'application/vnd.ms-excel',
-            'csv' => 'application/vnd.ms-excel'
-        ];
+       
     }
 
     public function getLedger(Request $request, $id=null){
@@ -50,7 +46,7 @@ class LedgerController extends Controller{
 
         // echo($revision_id);
 
-        $revision_entries = UploadRevision::where('company_id', $this->company_id)
+        $revision_entries = UploadRevision::where('company_id', $this->companyId)
             ->orderBy('created_at', 'DESC')
             ->get();
         
@@ -64,7 +60,7 @@ class LedgerController extends Controller{
         }
 
         // dd($revisions);
-        $sql = Ledger::where('company_id', $this->company_id);
+        $sql = Ledger::where('company_id', $this->companyId);
         if($revision_id != ''){
             $sql->where('revision', $revision_id);
         }
@@ -130,13 +126,13 @@ class LedgerController extends Controller{
         // unset($aqs['page']);
         $paging_qs = Vii::queryStringBuilder($aqs);
 
-        $upload_entries = UploadLedger::where('company_id', $this->company_id)
+        $upload_entries = UploadLedger::where('company_id', $this->companyId)
             ->orderBy('created_at', 'DESC')
             ->get();
 
         $upload_id = $request->get('upid');
 
-        $sql = UploadRevision::where('company_id', $this->company_id);
+        $sql = UploadRevision::where('company_id', $this->companyId);
              
         if($upload_id != ''){
             $sql->where('upload_id', $upload_id);
@@ -170,7 +166,7 @@ class LedgerController extends Controller{
     public function getDownloadRevisionFile(Request $request, $id=null){
 
         $revision = UploadRevision::where('id', $id)
-            ->where('company_id', $this->company_id)
+            ->where('company_id', $this->companyId)
             ->first();
         // dd($revision->toArray());
         
@@ -190,13 +186,13 @@ class LedgerController extends Controller{
 
     public function getDeleteRevision(Request $request, $id=null){
         $revision = UploadRevision::where('id', $id)
-            ->where('company_id', $this->company_id)
+            ->where('company_id', $this->companyId)
             ->first();
         
         // Delete Ledger
         Ledger::where('revision', $revision->id)->delete();
 
-        if(UploadRevision::where('upload_id', $revision->upload_id)->where('company_id', $this->company_id)->count() == 1){
+        if(UploadRevision::where('upload_id', $revision->upload_id)->where('company_id', $this->companyId)->count() == 1){
             UploadLedger::destroy($revision->upload_id);
         }
 
@@ -324,7 +320,7 @@ class LedgerController extends Controller{
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
         if($step == 1){
-            $entries = UploadLedger::where('company_id', $this->company_id)
+            $entries = UploadLedger::where('company_id', $this->companyId)
                 ->orderBy('created_at', 'DESC')
                 ->get(['id', 'upload_title']);
 
@@ -534,40 +530,7 @@ class LedgerController extends Controller{
         // }
     }
 
-    private function getTrueFileExtension($ufile){
-
-        $ext = null;
-        if($ufile->getClientMimeType() == $this->mime['xlsx']){   // .xlsx
-            $ext = 'xlsx';
-        }
-        else{
-            if($ufile->getClientOriginalExtension() == $this->mime['xls']){    // .xls
-                $ext = 'xls';
-            }
-            else{   // .csv
-                $ext = 'csv';
-            }
-        }
-        return $ext;
-    }
-
-    private function createReader($ext){
-       
-        $reader = null;
-       
-        if($ext == 'xlsx'){   // .xlsx
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-        }
-        else if($ext == 'xls'){
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
-        }
-        else{
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-        }
-
-        return $reader;
-    }
-    
+        
     private function getHeaderColunm($request, $spreadsheet){
         // $arr = file($ufile->path());
         // $first_line = '';
@@ -616,7 +579,7 @@ class LedgerController extends Controller{
         $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
 
        
-        $acc_entries = Account::where('company_id', $this->company_id)->get(['account_code']);
+        $acc_entries = Account::where('company_id', $this->companyId)->get(['account_code']);
 
         $accounts = [];
         if($acc_entries != null){
@@ -625,7 +588,7 @@ class LedgerController extends Controller{
             }
         }
 
-        $dim_entries = Dimension::where('company_id', $this->company_id)->get(['dim_code']);
+        $dim_entries = Dimension::where('company_id', $this->companyId)->get(['dim_code']);
         $dimensions = [];
         if($dim_entries != null){
             foreach($dim_entries as $v){
@@ -650,12 +613,14 @@ class LedgerController extends Controller{
             if($key != "" && !in_array($key, $accounts)){
 
                 $val = trim($worksheet->getCellByColumnAndRow($ledgers['account_code'] + 1, $row)->getValue());
-                $acc_data[$key] = [
-                    'account_code' => $key,
-                    'account_name' => $val,
-                    'status' => 1,
-                    'company_id' => $this->company_id
-                ];
+                if(!array_key_exists($key, $acc_data)){
+                    $acc_data[$key] = [
+                        'account_code' => $key,
+                        'account_name' => $val,
+                        'status' => 1,
+                        'company_id' => $this->companyId
+                    ];
+                }
             }
             
             // For Dimension
@@ -667,13 +632,16 @@ class LedgerController extends Controller{
                     
                     if($key2 != "" && !in_array($key2, $dimensions)){
                         $val2 = trim($worksheet->getCellByColumnAndRow($dim_name_col, $row)->getValue());
-                        $dim_data[$key2] = [
-                            'dim_code' => $key2,
-                            'dim_name' => $val2,
-                            'dim_type' => $type_id,
-                            'status' => 1,
-                            'company_id' => $this->company_id
-                        ];
+                        
+                        if(!array_key_exists($key2, $dim_data)){
+                            $dim_data[$key2] = [
+                                'dim_code' => $key2,
+                                'dim_name' => $val2,
+                                'dim_type' => $type_id,
+                                'status' => 1,
+                                'company_id' => $this->companyId
+                            ];
+                        }
                     }
                         
                     
@@ -707,7 +675,7 @@ class LedgerController extends Controller{
             $month = intval(substr($accounting_period, 4));
            
             $ledger_data[] = [
-                'company_id' => $this->company_id,
+                'company_id' => $this->companyId,
                 'account_code' => $key,
                 'ledger_key' => $ledger_key,
                 'base_amount' => doubleval($base_amount),
@@ -787,7 +755,7 @@ class LedgerController extends Controller{
         if(intval($upload_revision['upload_type']) == 1){
             $created_at =  date('Y-m-d H:i');
             $data = [
-                'company_id' => $this->company_id,
+                'company_id' => $this->companyId,
                 'upload_title' => $upload_revision['upload_title'] . ' (' . $created_at .')',
                 'created_at' => $created_at,
                 'salt_key' => md5(time()),
@@ -800,13 +768,13 @@ class LedgerController extends Controller{
             $upload_ledger = UploadLedger::findOrFail(intval($upload_revision['upload_id']));
         
         $count = UploadRevision::where('upload_id', $upload_ledger->id)
-            ->where('company_id', $this->company_id)
+            ->where('company_id', $this->companyId)
             ->count();
 
         $data = [
-            'id' => uniqid($this->company_id . $upload_ledger->id),
+            'id' => uniqid($this->companyId . $upload_ledger->id),
             'upload_id' => $upload_ledger->id,
-            'company_id' => $this->company_id,
+            'company_id' => $this->companyId,
             'created_at' => date('Y-m-d H:i:s'),
             'status' => 1,
             'revision_number' => $count + 1,

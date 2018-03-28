@@ -31,11 +31,11 @@
                 @endif  --}}
             </h4>
             <div class="tile-body">
-                <div class="form-group">
+                {{--  <div class="form-group">
                     <label class="control-label">Company</label>
                     {!! Form::select('company_id', $companies, '', ['class' => 'form-control', 'id' => 'company_id']) !!}
                     
-                </div>
+                </div>  --}}
 
                 <div class="form-group">
                     <label class="control-label">Dimension Type</label>
@@ -63,7 +63,7 @@
 
                 <div id='file_upload' class="col-md-12">
                     <div class="form-group">
-                        <label class="control-label">Data File(csv)</label>
+                        <label class="control-label">Data File(xlsx, csv)</label>
                         {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
                         <small class="form-text text-muted">The order of colunms: <strong>DIMENSION-CODE;DIMENSION-NAME</strong></small>
                     </div>

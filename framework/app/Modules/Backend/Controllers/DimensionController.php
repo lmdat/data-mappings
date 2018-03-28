@@ -36,7 +36,7 @@ class DimensionController extends Controller{
         $entries = Dimension::where('company_id', $com_id)
             ->select('*')
             ->orderBy('dim_type', 'ASC')
-            ->orderBy('dim_name', 'ASC')
+            ->orderBy('dim_code', 'ASC')
             ->paginate($display_rows);
         
         $entries->withPath(route('dimension', [str_replace('?', '', $paging_qs)]));
@@ -88,8 +88,9 @@ class DimensionController extends Controller{
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
         if($request->get('show_multiple') == null){
-            $form = $request->only(['dim_name', 'dim_code', 'company_id', 'dim_type']);
+            $form = $request->only(['dim_name', 'dim_code', 'dim_type']);
             $dim = new Dimension($form);
+            $dim->company_id = $this->companyId;
             $dim->status = 1;
 
             if($dim->save()){
@@ -104,68 +105,67 @@ class DimensionController extends Controller{
                     ->with('error-message', 'Cannot create new dimension.');
         }
         else{
-            // $accounts = explode("\r\n", $request->get('multiple_account'));
-            // $data = [];
-            // foreach($accounts as $account){
-            //     $a = explode('|', $account);
-            //     $_name = "";
-            //     $_code = "";
-            //     if(count($a) == 1){
-            //         $_code = $a[0];
-            //     }
-            //     else{
-            //         $_code = $a[0];
-            //         $_name = $a[1];
-            //     }
 
-            //     $data[] = [
-            //         'account_name' => trim($_name),
-            //         'account_code' => trim($_code),
+            if($request->hasFile('data_file')){
+                if($request->file('data_file')->isValid()){
+                    $ufile = $request->file('data_file');
+                    $ext = $this->getTrueFileExtension($ufile);
+                    $reader = $this->createReader($ext);
+                    $spreadsheet = $reader->load($ufile->path());
+                    $rs = $this->importDimension($request, $spreadsheet);
+
+                    if($rs === false){
+                        return redirect()
+                            ->route('dimension', [str_replace('?', '', $qs)])
+                            ->with('error-message', 'Cannot create new dimensions.');
+                    }
+
+                    return redirect()
+                        ->route('dimension', [str_replace('?', '', $qs)])
+                        ->with('success-message', "{$rs['dim']} dimensions are created.");
+
+                }
+            }
+
+            return redirect()
+                ->route('account', [str_replace('?', '', $qs)])
+                ->with('error-message', 'Invalid file upload.');
+
+            // $ufile = $request->file('data_file');
+            // $arr = file($ufile->path());
+            // if($request->post('skip_first_line') != null)
+            //     array_shift($arr);
+
+            
+            // $data = [];
+            // foreach($arr as $item){
+            //     $a = explode(';', $item);
+            //     $_code = trim($a[0]);
+            //     $_name = trim($a[1]);
+            //     if(array_key_exists($_code, $data) || $_code == '')
+            //         continue;
+                    
+            //     $data[$_code] = [
+            //         'dim_code' => $_code,
+            //         'dim_name' => $_name,
+            //         'company_id' => intval($request->post('company_id')),
+            //         'dim_type' => intval($request->post('dim_type')),
             //         'status' => 1
             //     ];
-
             // }
 
-            // request()->validate([
-            //     'data_file' => 'required|mimes:csv,xslx|max:1024',
-            // ]);
-
-            $ufile = $request->file('data_file');
-            $arr = file($ufile->path());
-            if($request->post('skip_first_line') != null)
-                array_shift($arr);
-
-            // $arr = array_unique($arr);
-            // dd($arr);
-            $data = [];
-            foreach($arr as $item){
-                $a = explode(';', $item);
-                $_code = trim($a[0]);
-                $_name = trim($a[1]);
-                if(array_key_exists($_code, $data) || $_code == '')
-                    continue;
-                    
-                $data[$_code] = [
-                    'dim_code' => $_code,
-                    'dim_name' => $_name,
-                    'company_id' => intval($request->post('company_id')),
-                    'dim_type' => intval($request->post('dim_type')),
-                    'status' => 1
-                ];
-            }
-
-            if(Dimension::insert($data)){
-                $c = count($data);
+            // if(Dimension::insert($data)){
+            //     $c = count($data);
                 
-                return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('success-message', "{$c} dimensions are created.");
-            }
+            //     return redirect()
+            //         ->route('dimension', [str_replace('?', '', $qs)])
+            //         ->with('success-message', "{$c} dimensions are created.");
+            // }
 
-            // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
-            return redirect()
-                    ->route('dimension', [str_replace('?', '', $qs)])
-                    ->with('error-message', 'Cannot create new dimensions.');
+            // // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
+            // return redirect()
+            //         ->route('dimension', [str_replace('?', '', $qs)])
+            //         ->with('error-message', 'Cannot create new dimensions.');
         }
         
     }
@@ -187,6 +187,53 @@ class DimensionController extends Controller{
         return redirect()
                     ->route('dimension', [str_replace('?', '', $qs)])
                     ->with('error-message', "Cannot update dimension[with code={$dim->dim_code}].");
+    }
+
+    private function importDimension($request, $spreadsheet){
+        $worksheet = $spreadsheet->getActiveSheet();
+        $highestRow = $worksheet->getHighestRow(); // e.g. 10
+        $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        $data = [];
+        for($row=1; $row<=$highestRow; $row++){
+            if($row == 1 && $request->post('skip_first_line') != null)
+                continue;
+
+            $_code = trim($worksheet->getCellByColumnAndRow(1, $row)->getValue());
+            $_name = trim($worksheet->getCellByColumnAndRow(2, $row)->getValue());
+
+            if(array_key_exists($_code, $data) || $_code == '')
+                continue;
+
+            $data[$_code] = [
+                'dim_code' => $_code,
+                'dim_name' => $_name,
+                'dim_type' => intval($request->post('dim_type')),
+                'company_id' => $this->companyId,
+                'status' => 1
+            ];
+        }
+
+        $rs = [
+            'dim' => 0
+        ];
+
+        $done = true;
+        
+        if(count($data) > 0){
+            foreach(collect($data)->chunk(100) as $subset){
+                $done = $done & Dimension::insert($subset->toArray());
+            }
+
+            $rs['dim'] = count($data);
+        }
+
+        if($done){
+            return $rs;
+        }
+
+        return $done;
     }
 
     // public function welcome(){

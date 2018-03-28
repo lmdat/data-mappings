@@ -30,7 +30,8 @@ class AccountController extends Controller{
         // unset($aqs['page']);
         $paging_qs = Vii::queryStringBuilder($aqs);
 
-        $entries = Account::select('*')
+        $entries = Account::where('company_id', $this->companyId)
+            ->select('*')
             ->orderBy('account_name', 'ASC')
             ->paginate($display_rows);
         
@@ -83,6 +84,7 @@ class AccountController extends Controller{
         if($request->get('show_multiple') == null){
             $form = $request->only(['account_name', 'account_code']);
             $account = new Account($form);
+            $account->company_id = $this->companyId;
             $account->status = 1;
 
             if($account->save()){
@@ -97,66 +99,31 @@ class AccountController extends Controller{
                     ->with('error-message', 'Cannot create new account.');
         }
         else{
-            // $accounts = explode("\r\n", $request->get('multiple_account'));
-            // $data = [];
-            // foreach($accounts as $account){
-            //     $a = explode('|', $account);
-            //     $_name = "";
-            //     $_code = "";
-            //     if(count($a) == 1){
-            //         $_code = $a[0];
-            //     }
-            //     else{
-            //         $_code = $a[0];
-            //         $_name = $a[1];
-            //     }
-
-            //     $data[] = [
-            //         'account_name' => trim($_name),
-            //         'account_code' => trim($_code),
-            //         'status' => 1
-            //     ];
-
-            // }
-
-            // request()->validate([
-            //     'data_file' => 'required|mimes:csv,xslx|max:1024',
-            // ]);
-
-            $ufile = $request->file('data_file');
-            $arr = file($ufile->path());
-            if($request->post('skip_first_line') != null)
-                array_shift($arr);
-
-            // $arr = array_unique($arr);
             
-            $data = [];
-            foreach($arr as $item){
-                $a = explode(';', $item);
-                $_code = trim($a[0]);
-                $_name = trim($a[1]);
-                if(array_key_exists($_code, $data))
-                    continue;
-                    
-                $data[$_code] = [
-                    'account_code' => $_code,
-                    'account_name' => $_name,
-                    'status' => 1
-                ];
+            if($request->hasFile('data_file')){
+                if($request->file('data_file')->isValid()){
+                    $ufile = $request->file('data_file');
+                    $ext = $this->getTrueFileExtension($ufile);
+                    $reader = $this->createReader($ext);
+                    $spreadsheet = $reader->load($ufile->path());
+                    $rs = $this->importAccount($request, $spreadsheet);
+
+                    if($rs === false){
+                        return redirect()
+                            ->route('account', [str_replace('?', '', $qs)])
+                            ->with('error-message', 'Cannot create new accounts.');
+                    }
+
+                    return redirect()
+                        ->route('account', [str_replace('?', '', $qs)])
+                        ->with('success-message', "{$rs['account']} accounts are created.");
+                }
             }
 
-            if(Account::insert($data)){
-                $c = count($data);
-                
-                return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('success-message', "{$c} accounts are created.");
-            }
-
-            // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
             return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('error-message', 'Cannot create new accounts.');
+                ->route('account', [str_replace('?', '', $qs)])
+                ->with('error-message', 'Invalid file upload.');
+           
         }
         
     }
@@ -178,6 +145,52 @@ class AccountController extends Controller{
         return redirect()
                     ->route('account', [str_replace('?', '', $qs)])
                     ->with('error-message', "Cannot update account[with code={$account->account_code}].");
+    }
+
+    private function importAccount($request, $spreadsheet){
+        $worksheet = $spreadsheet->getActiveSheet();
+        $highestRow = $worksheet->getHighestRow(); // e.g. 10
+        $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        $data = [];
+        for($row=1; $row<=$highestRow; $row++){
+            if($row == 1 && $request->post('skip_first_line') != null)
+                continue;
+
+            $_code = trim($worksheet->getCellByColumnAndRow(1, $row)->getValue());
+            $_name = trim($worksheet->getCellByColumnAndRow(2, $row)->getValue());
+
+            if(array_key_exists($_code, $data) || $_code == '')
+                continue;
+
+            $data[$_code] = [
+                'account_code' => $_code,
+                'account_name' => $_name,
+                'company_id' => $this->companyId,
+                'status' => 1
+            ];
+        }
+
+        $rs = [
+            'account' => 0
+        ];
+
+        $done = true;
+        
+        if(count($data) > 0){
+            foreach(collect($data)->chunk(100) as $subset){
+                $done = $done & Account::insert($subset->toArray());
+            }
+
+            $rs['account'] = count($data);
+        }
+
+        if($done){
+            return $rs;
+        }
+
+        return $done;
     }
 
     // public function welcome(){

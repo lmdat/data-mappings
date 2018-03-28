@@ -25,6 +25,8 @@ class Controller extends BaseController{
 
     protected $companyId;
 
+    protected $mime;
+
     public function __construct(){
 
         //inject admin authentication
@@ -67,9 +69,49 @@ class Controller extends BaseController{
 
         $this->sidebarMenu = $this->createMenu();
 
+        $this->mime = [
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'xls' => 'application/vnd.ms-excel',
+            'csv' => 'application/vnd.ms-excel'
+        ];
+
     }
 
     protected function guard(){
         return Auth::guard($this->guardName);
+    }
+
+    protected function getTrueFileExtension($ufile){
+
+        $ext = null;
+        if($ufile->getClientMimeType() == $this->mime['xlsx']){   // .xlsx
+            $ext = 'xlsx';
+        }
+        else{
+            if($ufile->getClientOriginalExtension() == $this->mime['xls']){    // .xls
+                $ext = 'xls';
+            }
+            else{   // .csv
+                $ext = 'csv';
+            }
+        }
+        return $ext;
+    }
+
+    protected function createReader($ext){
+       
+        $reader = null;
+       
+        if($ext == 'xlsx'){   // .xlsx
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        }
+        else if($ext == 'xls'){
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        }
+        else{
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+        }
+
+        return $reader;
     }
 }

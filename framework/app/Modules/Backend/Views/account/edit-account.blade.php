@@ -31,11 +31,11 @@
                 @endif  --}}
             </h4>
             <div class="tile-body">
-                <div class="form-group">
+                {{--  <div class="form-group">
                     <label class="control-label">Company</label>
                     {!! Form::select('company_id', $companies, $account->company_id, ['class' => 'form-control', 'id' => 'company_id']) !!}
                     
-                </div>
+                </div>  --}}
 
                 <div class="form-group row">
                     <div class="col-md-6">

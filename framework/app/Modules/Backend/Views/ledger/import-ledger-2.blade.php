@@ -12,8 +12,8 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
+<div class="row justify-content-center">
+    <div class="col-md-8">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'importForm', 'id' => 'importForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">
@@ -23,7 +23,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group row">
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <label class="control-label">Fields</label>                       
                             </div>
         
@@ -33,7 +33,7 @@
                         </div>
                         @foreach($ledger_fields as $k => $v)
                         <div class="form-group row">
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 {!! Form::text('field_text' . $loop->index, $v, ['id'=>'field_text', 'class' => 'form-control', 'readonly' => true]) !!}
                                 {!! Form::hidden('field_name[]', $k) !!}
                             </div>
@@ -47,7 +47,7 @@
     
                     <div class="col-md-6">
                         <div class="form-group row">
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <label class="control-label">Dimension Type</label>                       
                             </div>
         
@@ -57,7 +57,7 @@
                         </div>
                         @foreach($dim_types as $v)
                         <div class="form-group row">
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 {!! Form::text('dim_type_text' . $loop->index, $v->type_name, ['id'=>'dim_type_text', 'class' => 'form-control', 'readonly' => true]) !!}
                                 {!! Form::hidden('dim_type_id[]', $v->id) !!}
                             </div>

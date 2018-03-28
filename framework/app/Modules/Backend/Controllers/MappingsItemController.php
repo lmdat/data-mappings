@@ -16,7 +16,7 @@ class MappingsItemController extends Controller{
     const LANG_NAME = 'mappings-item';
 
     // private $companyId;
-    private $mime;
+   
 
     public function __construct(){
         parent::__construct();
@@ -25,12 +25,7 @@ class MappingsItemController extends Controller{
         $actions = request()->route()->getAction();
         $this->prefixUrl = $actions['prefix'];
 
-        $this->mime = [
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'xls' => 'application/vnd.ms-excel',
-            'csv' => 'application/vnd.ms-excel'
-        ];
-
+       
     }
 
     public function getItem(Request $request, $id=null){
@@ -254,7 +249,7 @@ class MappingsItemController extends Controller{
                 $ext = $this->getTrueFileExtension($ufile);
                 $reader = $this->createReader($ext);
                 $spreadsheet = $reader->load($ufile->path());
-                $rs = $this->insertItemLedger($request, $reader, $spreadsheet, ($ext == 'csv'));
+                $rs = $this->insertItemLedger($request, $spreadsheet, ($ext == 'csv'));
 
 
                 if($rs === false){
@@ -283,41 +278,9 @@ class MappingsItemController extends Controller{
 
     }
 
-    private function getTrueFileExtension($ufile){
+    
 
-        $ext = null;
-        if($ufile->getClientMimeType() == $this->mime['xlsx']){   // .xlsx
-            $ext = 'xlsx';
-        }
-        else{
-            if($ufile->getClientOriginalExtension() == $this->mime['xls']){    // .xls
-                $ext = 'xls';
-            }
-            else{   // .csv
-                $ext = 'csv';
-            }
-        }
-        return $ext;
-    }
-
-    private function createReader($ext){
-       
-        $reader = null;
-       
-        if($ext == 'xlsx'){   // .xlsx
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-        }
-        else if($ext == 'xls'){
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
-        }
-        else{
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-        }
-
-        return $reader;
-    }
-
-    private function insertItemLedger($request, $reader, $spreadsheet, $is_csv=false){
+    private function insertItemLedger($request, $spreadsheet, $is_csv=false){
         $worksheet = $spreadsheet->getActiveSheet();
         $highestRow = $worksheet->getHighestRow(); // e.g. 10
         $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
