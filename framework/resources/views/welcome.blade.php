@@ -9,12 +9,14 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Niconne" rel="stylesheet" type="text/css">
 
         <!-- Styles -->
         <style>
             html, body {
-                background-color: #fff;
-                color: #636b6f;
+                background-color: #ccc;
+                color: dimgrey;
                 font-family: 'Raleway', sans-serif;
                 font-weight: 100;
                 height: 100vh;
@@ -46,21 +48,25 @@
             }
 
             .title {
-                font-size: 84px;
+                font-size: 30px;
+                font-weight: bold;
             }
 
             .links > a {
                 color: #636b6f;
-                padding: 0 25px;
-                font-size: 12px;
-                font-weight: 600;
+                font-size: 30px;
+                font-weight: bold;
                 letter-spacing: .1rem;
                 text-decoration: none;
-                text-transform: uppercase;
             }
 
             .m-b-md {
                 margin-bottom: 30px;
+            }
+
+            .xdm{
+                font-family: 'Niconne', sans-serif;
+                font-size: 40px;
             }
         </style>
     </head>
@@ -78,17 +84,10 @@
             @endif
 
             <div class="content">
-                <div class="title m-b-md">
-                    Laravel
+                <div class="title m-b-md links">
+                    <a href="{{ url('/cpanel') }}"><span class="xdm">x.d.m</span> Cpanel &rarr;</a>
                 </div>
 
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
             </div>
         </div>
     </body>
