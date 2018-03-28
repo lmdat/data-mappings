@@ -309,44 +309,44 @@ trait SidebarMenuTrait{
                 ]
             ],
 
-            // [
-            //     'id' => '',
-            //     'text' => 'Settings',
-            //     'url' => '#',//'admin/setting',
-            //     'params' => [],
-            //     'icon' => "<i class='app-menu__icon fa fa-gears'></i>",
-            //     'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right'></i>",
-            //     'children' => [
-            //         [
-            //             'id' => '61',
-            //             'text' => trans($lang_mod . '.define_dimension'),
-            //             'url' => 'setting/dimension',
-            //             'params' => [],
-            //             'icon' => "<i class='fa fa-angle-double-right'></i>",
-            //             'level-icon' => "",
-            //             'children' => []
-            //         ],
-            //         [
-            //             'id' => '62',
-            //             'text' => trans($lang_mod . '.define_mappings_item'),
-            //             'url' => 'setting/mappings-item',
-            //             'params' => [],
-            //             'icon' => "<i class='fa fa-angle-double-right'></i>",
-            //             'level-icon' => "",
-            //             'children' => []
-            //         ],
-            //         [
-            //             'id' => '63',
-            //             'text' => trans($lang_mod . '.create_mappings'),
-            //             'url' => '#',
-            //             'params' => [],
-            //             'icon' => "<i class='fa fa-angle-double-right'></i>",
-            //             'level-icon' => "",
-            //             'children' => [
-            //             ]
-            //         ]
-            //     ]
-            // ]
+            [
+                'id' => '',
+                'text' => trans($lang_mod . '.setting'),
+                'url' => '#',//'admin/setting',
+                'params' => [],
+                'icon' => "<i class='app-menu__icon fa fa-gears'></i>",
+                'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right'></i>",
+                'children' => [
+                    [
+                        'id' => '61',
+                        'text' => trans($lang_mod . '.truncate_table'),
+                        'url' => 'setting/truncate',
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
+                    // [
+                    //     'id' => '62',
+                    //     'text' => trans($lang_mod . '.define_mappings_item'),
+                    //     'url' => 'setting/mappings-item',
+                    //     'params' => [],
+                    //     'icon' => "<i class='fa fa-angle-double-right'></i>",
+                    //     'level-icon' => "",
+                    //     'children' => []
+                    // ],
+                    // [
+                    //     'id' => '63',
+                    //     'text' => trans($lang_mod . '.create_mappings'),
+                    //     'url' => '#',
+                    //     'params' => [],
+                    //     'icon' => "<i class='fa fa-angle-double-right'></i>",
+                    //     'level-icon' => "",
+                    //     'children' => [
+                    //     ]
+                    // ]
+                ]
+            ]
 
             
             

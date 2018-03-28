@@ -72,7 +72,8 @@ class Controller extends BaseController{
         $this->mime = [
             'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'xls' => 'application/vnd.ms-excel',
-            'csv' => 'application/vnd.ms-excel'
+            // 'csv' => 'application/vnd.ms-excel'
+            'csv' => 'text/plain'
         ];
 
     }
@@ -84,17 +85,23 @@ class Controller extends BaseController{
     protected function getTrueFileExtension($ufile){
 
         $ext = null;
-        if($ufile->getClientMimeType() == $this->mime['xlsx']){   // .xlsx
-            $ext = 'xlsx';
-        }
-        else{
-            if($ufile->getClientOriginalExtension() == $this->mime['xls']){    // .xls
-                $ext = 'xls';
-            }
-            else{   // .csv
-                $ext = 'csv';
+        foreach($this->mime as $k =>$v){
+            if($ufile->getMimeType() == trim($v)){
+                $ext = $k;
+                break;
             }
         }
+        // if($ufile->getClientMimeType() == $this->mime['xlsx']){   // .xlsx
+        //     $ext = 'xlsx';
+        // }
+        // else{
+        //     if($ufile->getClientOriginalExtension() == $this->mime['xls']){    // .xls
+        //         $ext = 'xls';
+        //     }
+        //     else{   // .csv
+        //         $ext = 'csv';
+        //     }
+        // }
         return $ext;
     }
 

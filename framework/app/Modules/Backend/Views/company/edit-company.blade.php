@@ -33,13 +33,15 @@
             <div class="tile-body">
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">Company Name</label>
-                        {!! Form::text('company_name', $com->company_name, ['id'=>'company_name', 'class' => 'form-control', 'autofocus']) !!}
+                        <label class="control-label">Company Name <span class="text-danger">*</span></label>
+                        {!! Form::text('company_name', old('company_name', $com->company_name), ['id'=>'company_name', 'class' => 'form-control', 'autofocus']) !!}
+                        @if ($errors->has('company_name'))<p class="text-danger"><small>{!!$errors->first('company_name')!!}</small></p> @endif 
                     </div>
 
                     <div class="col-md-6">
-                            <label class="control-label">Short Name</label>
-                            {!! Form::text('short_name', $com->short_name, ['id'=>'short_name', 'class' => 'form-control']) !!}
+                            <label class="control-label">Short Name <span class="text-danger">*</span></label>
+                            {!! Form::text('short_name', old('short_name', $com->short_name), ['id'=>'short_name', 'class' => 'form-control']) !!}
+                            @if ($errors->has('short_name'))<p class="text-danger"><small>{!!$errors->first('short_name')!!}</small></p> @endif 
                     </div>
                 </div>
 

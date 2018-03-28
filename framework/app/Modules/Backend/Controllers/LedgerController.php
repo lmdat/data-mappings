@@ -436,7 +436,7 @@ class LedgerController extends Controller{
 
     }
 
-    public function postImportLedger(ImportLedgerRequest $request){
+    public function postImportLedger(Request $request){
         $step = $request->post('step', 0);
 
         if($step == 0){
@@ -448,12 +448,24 @@ class LedgerController extends Controller{
 
         if($step == 1){
 
+            // Validation
+            $request->validate([
+                'data_file' => 'required|max:10240|mimetypes:text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                // 'data_file' => 'required|max:10240|mimes:csv,txt,xls,xlsx',
+                'upload_title' => 'required_with:upload_type,1'
+            ],[
+                'data_file.required' => '[Data File] select a file to upload',
+                'data_file.max' => '[Data File] file size must be <= 10Mb',
+                'data_file.mimetypes' => '[Data File] file type must be csv, xls or xlsx',
+                'upload_title.required_with' => '[Upload Title] cannot be blank'
+            ]);
+
             $upload_revision = $request->only(['upload_type', 'upload_title', 'upload_id']);
 
             $ufile = $request->file('data_file');
             $ext = $this->getTrueFileExtension($ufile);
             
-            // dd($ufile->getClientOriginalExtension());
+            // dd($ufile->getClientOriginalExtension(), $ufile->clientExtension(), $ufile->getClientMimeType(), $ufile->getMimeType());
 
             $reader = $this->createReader($ext);
 

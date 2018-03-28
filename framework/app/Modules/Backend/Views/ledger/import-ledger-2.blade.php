@@ -85,20 +85,29 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
-        $('#multiple_item_container').hide()
-        $('#chk_show_multiple').on('click', function(){
-            if($(this).is(':checked')){
-                $('#item_name').attr('disabled', true);
-                $('#short_name').attr('disabled', true);
-                $('#multiple_item_container').show(500);
+        $("#importForm").on('submit', function(e){
+
+            var n = $("select[name='ledger_header[]']").length;
+            var k = 0;
+            $("select[name='ledger_header[]']").each(function(){
+                if($(this).val() != "0"){
+                    k++;
+                }
+            });
+
+            if(n == k){
+               $(this).submit(); 
             }
             else{
-                $('#item_name').attr('disabled', false);
-                $('#short_name').attr('disabled', false);
-                $('#multiple_item_container').hide(500);
+                e.preventDefault();
+                if(k == 0){
+                    alert('Please select column for each field.');
+                }                    
+                else{
+                    alert('Please select ' + (n - k) + ' more column for each field.');
+                }
             }
-                
         });
-    })
+    });
 </script>
 @stop

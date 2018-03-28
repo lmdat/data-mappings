@@ -32,8 +32,8 @@
             </h4>
             <div class="tile-body">
                 <div class="form-group">
-                    <label class="control-label">Mappings Type</label>
-                    {!! Form::select('type_id', $type_list, $item->type_id, ['class' => 'form-control', 'id' => 'type_id', 'required']) !!}
+                    <label class="control-label">Mappings Type <span class="text-danger">*</span></label>
+                    {!! Form::select('type_id', $type_list, old('type_id', $item->type_id), ['class' => 'form-control', 'id' => 'type_id']) !!}
                     @if ($errors->has('type_id'))<p class="text-danger"><small>{!!$errors->first('type_id')!!}</small></p> @endif  
                 </div>
 
@@ -44,14 +44,14 @@
 
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">Item Name</label>
-                        {!! Form::text('item_name', $item->item_name, ['id'=>'item_name', 'class' => 'form-control', 'required']) !!}
+                        <label class="control-label">Item Name <span class="text-danger">*</span></label>
+                        {!! Form::text('item_name', old('item_name', $item->item_name), ['id'=>'item_name', 'class' => 'form-control']) !!}
                         @if ($errors->has('item_name'))<p class="text-danger"><small>{!!$errors->first('item_name')!!}</small></p> @endif  
                    </div>
 
                    <div class="col-md-6">
-                         <label class="control-label">Short Name</label>
-                         {!! Form::text('short_name', $item->short_name, ['id'=>'short_name', 'class' => 'form-control', 'required']) !!}
+                         <label class="control-label">Short Name <span class="text-danger">*</span></label>
+                         {!! Form::text('short_name', old('short_name', $item->short_name), ['id'=>'short_name', 'class' => 'form-control']) !!}
                          @if ($errors->has('short_name'))<p class="text-danger"><small>{!!$errors->first('short_name')!!}</small></p> @endif  
                    </div>
                 </div>

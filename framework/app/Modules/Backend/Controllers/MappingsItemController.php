@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Modules\Backend\Requests\Item\ItemCreateRequest;
 use App\Modules\Backend\Requests\Item\ItemEditRequest;
+use App\Modules\Backend\Requests\Item\ItemMountRequest;
 
 class MappingsItemController extends Controller{
 
@@ -177,7 +178,7 @@ class MappingsItemController extends Controller{
         
     }
 
-    public function putEditItem(Request $request, $id=null){
+    public function putEditItem(ItemEditRequest $request, $id=null){
         $id = $request->post('id');
 
         $form = $request->only(['parent_id', 'item_name', 'short_name', 'type_id']);
@@ -242,7 +243,7 @@ class MappingsItemController extends Controller{
         );
     }
 
-    public function postMountAccountItem(Request $request, $id=null){
+    public function postMountAccountItem(ItemMountRequest $request, $id=null){
 
         $qs = Vii::queryStringBuilder($request->getQueryString());
 

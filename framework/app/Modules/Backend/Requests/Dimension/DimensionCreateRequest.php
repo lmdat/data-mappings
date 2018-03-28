@@ -25,7 +25,8 @@ class DimensionCreateRequest extends Request{
             'dim_type' => 'required',
             'dim_name' => 'required_without:show_multiple',
             'dim_code' => 'required_without:show_multiple',
-            'data_file' => 'required_with:show_multiple|max:10240|mimes:csv,xls,xlsx'
+            // 'data_file' => 'required_with:show_multiple|max:10240|mimes:csv,xls,xlsx,txt'
+            'data_file' => 'required|max:10240|mimetypes:text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             // 'role_id' => 'required'
             //'total_prize' => 'required|integer|min:1',
         ];
@@ -38,7 +39,7 @@ class DimensionCreateRequest extends Request{
             'dim_code.required_without' => '[Dimension Code] cannot be blank',
             'data_file.required_with' => '[Data File] select one file to upload',
             'data_file.max' => '[Data File] file size must be <= 10Mb',
-            'data_file.mimes' => '[Data File] file type must be csv, xls or xlsx',
+            'data_file.mimetypes' => '[Data File] file type must be csv, xls or xlsx',
            
            
         ];

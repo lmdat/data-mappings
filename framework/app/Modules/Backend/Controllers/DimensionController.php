@@ -172,7 +172,7 @@ class DimensionController extends Controller{
         
     }
 
-    public function putEditDimension(Request $request, $id=null){
+    public function putEditDimension(DimensionEditRequest $request, $id=null){
         $id = $request->post('id');
 
         $form = $request->only(['dim_code', 'dim_name', 'company_id', 'dim_type']);

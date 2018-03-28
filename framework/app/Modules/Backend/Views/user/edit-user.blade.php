@@ -35,13 +35,13 @@
                 <div class="form-group row">
                     <div class="col-md-6">
                         <label class="control-label">First Name <span class="text-danger">*</span></label>
-                        {!! Form::text('first_name', $user->first_name, ['id'=>'first_name', 'class' => 'form-control', 'required']) !!}
+                        {!! Form::text('first_name', old('first_name', $user->first_name), ['id'=>'first_name', 'class' => 'form-control']) !!}
                         @if ($errors->has('first_name'))<p class="text-danger"><small>{!!$errors->first('first_name')!!}</small></p> @endif
                    </div>
 
                    <div class="col-md-6">
                          <label class="control-label">Last Name <span class="text-danger">*</span></label>
-                         {!! Form::text('last_name', $user->last_name, ['id'=>'last_name', 'class' => 'form-control', 'required']) !!}
+                         {!! Form::text('last_name', old('last_name', $user->last_name), ['id'=>'last_name', 'class' => 'form-control']) !!}
                          @if ($errors->has('last_name'))<p class="text-danger"><small>{!!$errors->first('last_name')!!}</small></p> @endif
                    </div>
                 </div>
@@ -49,7 +49,7 @@
                 <div class="form-group row">
                     <div class="col-md-6">
                         <label class="control-label">Email <span class="text-danger">*</span></label>
-                        {!! Form::email('email', $user->email, ['id'=>'email', 'class' => 'form-control', 'required']) !!}
+                        {!! Form::email('email', old('email', $user->email), ['id'=>'email', 'class' => 'form-control']) !!}
                         @if ($errors->has('email'))<p class="text-danger"><small>{!!$errors->first('email')!!}</small></p> @endif
                     </div>
 
@@ -63,12 +63,12 @@
 
                 <div class="form-group">
                     <label class="control-label">Role <span class="text-danger">*</span></label>
-                    <select id="role_id" name="role_id" class="form-control" required>
+                    <select id="role_id" name="role_id" class="form-control">
                         <option value="">---</option>
                         @foreach($roles as $role)
                         <option value="{{$role->id}}"
                             @if(in_array($role->power, $disabled_roles)) disabled @endif
-                            @if($role->id == $user->roleId())) selected @endif>
+                            @if($role->id == old('role_id', $user->roleId()))) selected @endif>
                             {{ $role->role_name }}
                         </option>
                         @endforeach

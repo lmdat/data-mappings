@@ -28,9 +28,10 @@
             </h4>
             <div class="tile-body">
                 <div class="form-group">
-                    <label class="control-label">Data File(xlsx, csv)</label>
-                    {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
+                    <label class="control-label">Data File(xls, xlsx, csv)</label>
+                    {!! Form::file('data_file', ['id'=>'data_file', 'accept'=>'.csv, .xls, .xlsx', 'class' => 'form-control']) !!}
                     <small class="form-text text-muted">Order of Column: MAPPING_ITEM_ID | LEDGER_KEY</small>
+                    @if ($errors->has('data_file'))<p class="text-danger"><small>{!!$errors->first('data_file')!!}</small></p> @endif 
                 </div>  
                 <div class="animated-checkbox">
                     <label>

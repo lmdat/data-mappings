@@ -48,8 +48,8 @@ return [
     //     'menu_trashed_list' => 'Menu Xóa Tạm Thời',
     //     'add_menu' => 'Tạo Menu',
 
-    'settings' => 'Settings',
-        'define_dimension' => 'Define Dimension',
+    'setting' => 'Setting',
+        'truncate_table' => 'Truncate Table',
         
         'create_mappings' => 'Create Mappings'
     

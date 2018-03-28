@@ -1,6 +1,10 @@
 <?php
 namespace App\Modules\Backend\Controllers;
 
+
+use Illuminate\Support\Facades\DB;
+use App\Models\Ledger;
+
 class DashboardController extends Controller{
     const LANG_NAME = 'dashboard';
 
@@ -20,7 +24,7 @@ class DashboardController extends Controller{
         $full_name = $this->guard->user()->first_name . ' ' . $this->guard->user()->last_name;
         // dd(bcrypt('123456'));
         // dd($this->guard->user()->maxRole());
-
+        
         return view(
             'Backend::dashboard.welcome',
             [

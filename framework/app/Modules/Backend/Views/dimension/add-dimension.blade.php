@@ -38,7 +38,7 @@
                 </div>  --}}
 
                 <div class="form-group">
-                    <label class="control-label">Dimension Type</label>
+                    <label class="control-label">Dimension Type <span class="text-danger">*</span></label>
                     {!! Form::select('dim_type', $type_list, '', ['class' => 'form-control', 'id' => 'dim_type']) !!}
                     @if ($errors->has('dim_type'))<p class="text-danger"><small>{!!$errors->first('dim_type')!!}</small></p> @endif
                     
@@ -46,13 +46,13 @@
 
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">Dimension Code</label>
+                        <label class="control-label">Dimension Code <span class="text-danger">*</span></label>
                         {!! Form::text('dim_code', '', ['id'=>'dim_code', 'class' => 'form-control']) !!}
                         @if ($errors->has('dim_code'))<p class="text-danger"><small>{!!$errors->first('dim_code')!!}</small></p> @endif
                    </div>
 
                    <div class="col-md-6">
-                         <label class="control-label">Dimension Name</label>
+                         <label class="control-label">Dimension Name <span class="text-danger">*</span></label>
                          {!! Form::text('dim_name', '', ['id'=>'dim_name', 'class' => 'form-control']) !!}
                          @if ($errors->has('dim_name'))<p class="text-danger"><small>{!!$errors->first('dim_name')!!}</small></p> @endif
                    </div>

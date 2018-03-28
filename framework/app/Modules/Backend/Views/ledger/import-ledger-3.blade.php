@@ -55,21 +55,6 @@
 
 @section('scripts')
 <script type="text/javascript">
-    $(function(){
-        $('#multiple_item_container').hide()
-        $('#chk_show_multiple').on('click', function(){
-            if($(this).is(':checked')){
-                $('#item_name').attr('disabled', true);
-                $('#short_name').attr('disabled', true);
-                $('#multiple_item_container').show(500);
-            }
-            else{
-                $('#item_name').attr('disabled', false);
-                $('#short_name').attr('disabled', false);
-                $('#multiple_item_container').hide(500);
-            }
-                
-        });
-    })
+    
 </script>
 @stop

@@ -39,13 +39,13 @@
 
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">Account Code</label>
+                        <label class="control-label">Account Code <span class="text-danger">*</span></label>
                         {!! Form::text('account_code', '', ['id'=>'account_code', 'class' => 'form-control', 'autofocus', 'required']) !!}
                         @if ($errors->has('account_code'))<p class="text-danger"><small>{!!$errors->first('account_code')!!}</small></p> @endif
                    </div>
 
                    <div class="col-md-6">
-                         <label class="control-label">Account Name</label>
+                         <label class="control-label">Account Name <span class="text-danger">*</span></label>
                          {!! Form::text('account_name', '', ['id'=>'account_name', 'class' => 'form-control', 'required']) !!}
                          @if ($errors->has('account_name'))<p class="text-danger"><small>{!!$errors->first('account_name')!!}</small></p> @endif
                    </div>

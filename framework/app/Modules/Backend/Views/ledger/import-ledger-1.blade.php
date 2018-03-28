@@ -22,8 +22,9 @@
             <div class="tile-body">
                 
                 <div class="form-group">
-                    <label class="control-label">Data File(xlsx, csv)</label>
-                    {!! Form::file('data_file', ['id'=>'data_file', 'class' => 'form-control']) !!}
+                    <label class="control-label">Data File(xls, xlsx, csv)</label>
+                    {!! Form::file('data_file', ['id'=>'data_file', 'accept'=>'.csv, .xls, .xlsx', 'class' => 'form-control']) !!}
+                    @if ($errors->has('data_file'))<p class="text-danger"><small>{!!$errors->first('data_file')!!}</small></p> @endif  
                 </div>  
                 <div class="animated-checkbox">
                     <label>
@@ -48,6 +49,7 @@
                     <div id="new_import" class="form-group">
                         <label class="control-label">Upload Title</label>
                         {!! Form::text('upload_title', '', ['id'=>'upload_title', 'class' => 'form-control']) !!}
+                        @if ($errors->has('upload_title'))<p class="text-danger"><small>{!!$errors->first('upload_title')!!}</small></p> @endif  
                     </div>     
                     @if($total_upload > 0)
                     <div id="revision_import" class="form-group">
@@ -71,6 +73,9 @@
 @section('scripts')
 <script type="text/javascript">
     $(function(){
+
+        //$('#rdo_upload_new').attr('checked', true);
+
         @if($total_upload > 0)
         $('#revision_import').hide();
         @endif 

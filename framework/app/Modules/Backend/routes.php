@@ -176,6 +176,23 @@ Route::group([
 
     });
 
+    // Setting
+    Route::group(
+        [
+            'prefix' => 'setting',
+            //'middleware' => ['admin_permission'],
+            
+            //'roles' => [700]
+        ], function(){
+
+        
+            Route::get('/truncate', ['uses' => 'SettingController@getTruncateTable'])->name('truncate-table');
+            Route::post('/truncate', ['uses' => 'SettingController@postTruncateTable'])->name('truncate-table-post');
+       
+
+
+    });
+
     
 
     // Route::get('setting/dimension', ['uses' => 'SettingController@getDimension']);
