@@ -29,7 +29,7 @@
                 <div class="form-group">
                     <label class="control-label">Company will be handle:</label>
                     {!! Form::select('company_id', $companies, $selected_company, ['class' => 'form-control', 'id' => 'company_id']) !!}
-                    
+                    @if ($errors->has('company_id'))<p class="text-danger"><small>{!!$errors->first('company_id')!!}</small></p> @endif  
                 </div>
 
             </div>

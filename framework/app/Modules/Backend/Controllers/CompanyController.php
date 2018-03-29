@@ -10,6 +10,7 @@ use App\Models\Role;
 
 use App\Modules\Backend\Requests\Company\CompanyCreateRequest;
 use App\Modules\Backend\Requests\Company\CompanyEditRequest;
+use App\Modules\Backend\Requests\Company\CompanySelectRequest;
 
 
 class CompanyController extends Controller{
@@ -141,7 +142,7 @@ class CompanyController extends Controller{
         );
     }
 
-    public function postSelectCompany(Request $request){
+    public function postSelectCompany(CompanySelectRequest $request){
         $cid = $request->post('company_id');
         // dd($cid);
         $com = Company::findOrFail($cid);

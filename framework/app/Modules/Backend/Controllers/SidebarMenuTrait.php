@@ -232,7 +232,7 @@ trait SidebarMenuTrait{
                 'text' => trans($lang_mod . '.account'),
                 'url' => '#',
                 'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-flash' aria-hidden='true'></i>",
+                'icon' => "<i class='app-menu__icon fa fa-leaf' aria-hidden='true'></i>",
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     [

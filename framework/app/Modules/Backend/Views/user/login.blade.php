@@ -14,9 +14,9 @@
         <h1>x.d.m</h1>
     </div>
     @if(session()->has('message-error'))
-        <span class="badge badge-danger">
+        <div class="p-3 mb-2 bg-danger text-white">
             <strong>Oh snap!</strong> {{ session()->get('message-error') }}
-        </span>
+        </div>
     @endif
     <div class="login-box">
     {!! Form::open(['url' => route('backend-post-login'), 'class' => 'login-form', 'name' => 'loginForm', 'id' => 'loginForm', 'role' => 'form']) !!}
