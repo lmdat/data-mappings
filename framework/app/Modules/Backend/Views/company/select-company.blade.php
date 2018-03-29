@@ -34,7 +34,7 @@
 
             </div>
             <div class="tile-footer text-right">
-                <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i>Select</button>
+                <button class="btn btn-primary" type="submit"><i class="fa fa-check"></i>Select</button>
             </div>
             
         </div>

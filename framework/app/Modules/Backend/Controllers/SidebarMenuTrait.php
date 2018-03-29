@@ -26,7 +26,7 @@ trait SidebarMenuTrait{
                 'text' => trans($lang_mod . '.user'),
                 'url' => '#',
                 'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'icon' => "<i class='app-menu__icon fa fa-user-circle' aria-hidden='true'></i>",
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     
@@ -48,7 +48,7 @@ trait SidebarMenuTrait{
                 'text' => trans($lang_mod . '.company'),
                 'url' => '#',
                 'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'icon' => "<i class='app-menu__icon fa fa-address-card' aria-hidden='true'></i>",
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     
@@ -201,7 +201,7 @@ trait SidebarMenuTrait{
                 'text' => trans($lang_mod . '.mappings_item'),
                 'url' => '#',
                 'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'icon' => "<i class='app-menu__icon fa fa-list-ol' aria-hidden='true'></i>",
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     [
@@ -232,7 +232,7 @@ trait SidebarMenuTrait{
                 'text' => trans($lang_mod . '.account'),
                 'url' => '#',
                 'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'icon' => "<i class='app-menu__icon fa fa-flash' aria-hidden='true'></i>",
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     [
@@ -253,7 +253,7 @@ trait SidebarMenuTrait{
                 'text' => trans($lang_mod . '.dimension'),
                 'url' => '#',
                 'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'icon' => "<i class='app-menu__icon fa fa-th' aria-hidden='true'></i>",
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     [
@@ -274,7 +274,7 @@ trait SidebarMenuTrait{
                 'text' => trans($lang_mod . '.ledger'),
                 'url' => '#',
                 'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-dashboard' aria-hidden='true'></i>",
+                'icon' => "<i class='app-menu__icon fa fa-key' aria-hidden='true'></i>",
                 'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
                 'children' => [
                     [
