@@ -13,11 +13,21 @@ class ModuleServiceProvider extends ServiceProvider{
         $base_url = request()->getBaseUrl();
 
         $backend_slug = $modules['backend']['slug_name'];
-
         //base url end with cpanel or cpanel/
-        $pattern = '/(\/'.$backend_slug.'|\/'.$backend_slug.'\/)$/';
-        if(preg_match($pattern, $base_url, $match)) {
+        $cpanel_pattern = '/(\/'.$backend_slug.'|\/'.$backend_slug.'\/)$/';
+
+        $api_slug = $modules['api']['slug_name'];
+        //base url end with api or api/
+        $api_pattern = '/(\/'.$api_slug.'|\/'.$api_slug.'\/)$/';
+
+        if(preg_match($cpanel_pattern, $base_url, $match)) {
             $mod = $modules['backend']['folder_name'];
+        }
+        elseif(preg_match($api_pattern, $base_url, $match)){
+            $mod = $modules['api']['folder_name'];
+        }
+        else{
+            $mod = $modules['frontend']['folder_name'];
         }
 
         if(file_exists(__DIR__ . '/' . $mod . '/routes.php')){

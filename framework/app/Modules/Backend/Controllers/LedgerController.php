@@ -66,7 +66,7 @@ class LedgerController extends Controller{
         if($revision_id != ''){
             $sql->where('revision', $revision_id);
         }
-        $entries = $sql->select(['account_code', 'ledger_key', 'base_amount', 'accounting_period'])
+        $entries = $sql->select(['account_code', 'ledger_key', 'ledger_code', 'base_amount', 'accounting_period'])
             ->orderBy('account_code', 'ASC')
             ->orderBy('accounting_period', 'ASC')
             ->paginate($display_rows);
@@ -664,6 +664,7 @@ class LedgerController extends Controller{
 
             // For Ledger
             $ledger_key = str_replace(['_#BLANK#'], '', trim($worksheet->getCellByColumnAndRow($ledgers['ledger_key'], $row)->getValue()));
+            $ledger_code = trim($worksheet->getCellByColumnAndRow($ledgers['ledger_key'] + 1, $row)->getValue());
             $base_amount = trim($worksheet->getCellByColumnAndRow($ledgers['base_amount'], $row)->getValue());
             if($is_csv){
                 if($base_amount != ''){
@@ -692,6 +693,7 @@ class LedgerController extends Controller{
                 'company_id' => $this->companyId,
                 'account_code' => $key,
                 'ledger_key' => $ledger_key,
+                'ledger_code' => $ledger_code,
                 'base_amount' => doubleval($base_amount),
                 'accounting_period' => $year . '-' . (($month < 10) ? '0'.$month : $month) . '-01',
                 'year' => $year,

@@ -1,9 +1,9 @@
 <?php
-namespace App\Modules\Backend\Requests\Item;
+namespace App\Modules\Backend\Requests\Topic;
 
 use App\Modules\Backend\Requests\Request;
 
-class ItemMountRequest extends Request{
+class TopicMountRequest extends Request{
 
     /**
      * Determine if the user is authorized to make this request.

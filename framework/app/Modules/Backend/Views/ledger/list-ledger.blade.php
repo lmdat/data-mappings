@@ -39,6 +39,7 @@
                     <thead class="thead-dark">
                         <tr>
                             <th>Ledger Key</th>
+                            <th>Ledger Code</th>
                             <th>Base Amount</th>
                             <th>Period</th>
                             
@@ -49,6 +50,7 @@
                         @foreach($entries as $k=>$item)
                         <tr>
                             <td>{{ $item->ledger_key }}</td>
+                            <td>{{ $item->ledger_code }}</td>
                             <td class="text-right">{{ App\Libs\Utils\Vii::formatCurrency($item->base_amount) }}</td>
                             <td>{{ substr($item->accounting_period, 0, strlen($item->accounting_period) - 3 ) }}</td>
                             <td>

@@ -7,21 +7,21 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Define Dimension</h1>
-        <p>Import data of Dimension</p>
+        <h1><i class="fa fa-location-arrow"></i> Create/Edit {{$typical_name}} Dimension</h1>
+        <p>Create {{$typical_name}} Dimension</p>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-8">
-        @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs])
+        @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs, 'typical_name' => $typical_name])
     </div>
 
     <div class="col-md-4">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'post', 'name' => 'dimForm', 'id' => 'dimForm', 'role' => 'form', 'files' => true]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Insert Dimension
+                Insert {{$typical_name}} Dimension
                 {{--  @if(session()->has('error-message'))
                     <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
                 @endif
@@ -68,7 +68,7 @@
                     <div class="form-group">
                         <label class="control-label">Data File(xls, xlsx, csv)</label>
                         {!! Form::file('data_file', ['id'=>'data_file', 'accept'=>'.csv, .xls, .xlsx', 'class' => 'form-control']) !!}
-                        <small class="form-text text-muted">The order of colunms: <strong>DIMENSION-CODE;DIMENSION-NAME</strong></small>
+                        <small class="form-text text-muted">The order of colunms: <strong>DIMENSION_CODE | DIMENSION_NAME</strong></small>
                         @if ($errors->has('data_file'))<p class="text-danger"><small>{!!$errors->first('data_file')!!}</small></p> @endif
                     </div>
 

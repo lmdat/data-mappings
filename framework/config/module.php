@@ -9,5 +9,12 @@ return [
     'frontend' => [
         'folder_name' => 'Frontend',
         'slug_name' => ''
+    ],
+
+    'api' => [
+
+        'folder_name' => 'Api',
+        'slug_name' => 'api'
+
     ]
 ];

@@ -1,9 +1,9 @@
 <?php
-namespace App\Modules\Backend\Requests\Item;
+namespace App\Modules\Backend\Requests\Topic;
 
 use App\Modules\Backend\Requests\Request;
 
-class ItemCreateRequest extends Request{
+class TopicCreateRequest extends Request{
 
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +23,8 @@ class ItemCreateRequest extends Request{
     public function rules(){
         return [
             'type_id' => 'required',
-            'item_name' => 'required_without:show_multiple',
-            'short_name' => 'required_without:show_multiple',
+            'topic_name' => 'required_without:show_multiple',
+            // 'short_name' => 'required_without:show_multiple',
             'show_multiple' => 'sometimes',
             'multiple_item' => 'required_with:show_multiple'
             // 'role_id' => 'required'
@@ -35,8 +35,8 @@ class ItemCreateRequest extends Request{
     public function messages(){
         return [
             'type_id.required' => '[Mapping Type] Select one',
-            'item_name.required_without' => '[Item Name] cannot be blank',
-            'short_name.required_without' => '[Short Name] cannot be blank',
+            'topic_name.required_without' => '[Topic Name] cannot be blank',
+            // 'short_name.required_without' => '[Short Name] cannot be blank',
             'multiple_item.required_with' => '[Multple Items] cannot be blank',
            
         ];

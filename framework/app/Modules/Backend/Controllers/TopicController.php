@@ -4,159 +4,297 @@ namespace App\Modules\Backend\Controllers;
 use Illuminate\Http\Request;
 use App\Libs\Utils\Vii;
 
+use App\Models\TopicType;
+use App\Models\Topic;
 use App\Models\Account;
-use App\Models\Company;
 use App\Models\Dimension;
 use App\Models\DimensionType;
+use App\Models\Company;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+
+use App\Modules\Backend\Requests\Topic\TopicCreateRequest;
+use App\Modules\Backend\Requests\Topic\TopicEditRequest;
 use App\Modules\Backend\Requests\Topic\TopicMountRequest;
 
 use App\Modules\Backend\Requests\Dimension\DimensionCreateRequest;
 use App\Modules\Backend\Requests\Dimension\DimensionEditRequest;
 
-use App\Modules\Backend\Requests\Account\AccountCreateRequest;
-use App\Modules\Backend\Requests\Account\AccountEditRequest;
+class TopicController extends Controller{
 
-class AccountController extends Controller{
-    const LANG_NAME = 'account';
+    const LANG_NAME = 'topic';
+
+    // private $companyId;
+   
 
     public function __construct(){
         parent::__construct();
-
         view()->share('lang_mod', $this->mod . '/' . self::LANG_NAME);
 
         $actions = request()->route()->getAction();
         $this->prefixUrl = $actions['prefix'];
 
-
+       
     }
 
-    public function getAccount(Request $request, $id=null){
-
-        $display_rows = $request->input('rows_per_page', 15);
-
+    public function getTopic(Request $request, $id=null){
+  
         $aqs = $request->except('page'); 
         // unset($aqs['page']);
-        $paging_qs = Vii::queryStringBuilder($aqs);
-
-        $entries = Account::where('company_id', $this->companyId)
-            ->select('*')
-            ->orderBy('account_name', 'ASC')
-            ->paginate($display_rows);
         
-        $entries->withPath(route('account', [str_replace('?', '', $paging_qs)]));
-
-        $companies = Company::all();
+        $qs = Vii::queryStringBuilder($aqs);
         
-        //dd($entries->toArray());
+        $topic_type = TopicType::all();
 
+        $root_parent = Topic::getRootParentList($this->companyId);
+       
+        $fields = ['id', 'topic_name', 'type_id', 'is_leaf'];
+
+        $tree_data = [];
+        if(count($root_parent) > 0){
+            $tree_data = Topic::createTreeList($root_parent, $fields, $this->companyId, true);
+        }
+
+        // Paging
+        $perPage = 15;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $col = new Collection($tree_data);
+        $currentPageSearchResults = $col->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        $entries = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
+        $entries->setPath(route('topic', [str_replace('?', '', $qs)]));
+        //dd($entries);
+      
         if($id != null){
-            $account = Account::findOrFail($id);
-            // dd($account);
+            $item = Topic::findOrFail($id);
+            //dd($item->toArray());
+
             return view(
-                'Backend::account.edit-account',
+                'Backend::topic.edit-topic',
                 [
-                    'form_uri' => ($id == null) ? route('account-post-create') : route('account-put-edit', [$id]),
-                    'page_title' => 'Define Account',
+                    'form_uri' => route('topic-put-edit', [$id]),
+                    'page_title' => 'Edit Topic',
                     'entries' => $entries,
                     'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                    'account' => $account,
-                    'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
-                    //'type_list' => Vii::createOptionData($mappings_type->toArray(), 'id', ['type_name', 'short_code']),
-                    
-                    
+                    'type_list' => Vii::createOptionData($topic_type->toArray(), 'id', ['type_name']),
+                    'tree_data' => Vii::createOptionData($tree_data, 'id', 'tmp_name', ['0'=>'---Root---']) ,
+                    'item' => $item
                     //'user' => session()->get('test-name', $full_name)
                 ]
             );
-
         }
-       
+
         return view(
-            'Backend::account.add-account',
+            'Backend::topic.create-topic',
             [
-                'form_uri' => ($id == null) ? route('account-post-create') : route('account-put-edit', [$id]),
-                'page_title' => 'Define Account',
+                'form_uri' => route('topic-post-create'),
+                'page_title' => 'Create Topic',
                 'entries' => $entries,
                 'qs' => Vii::queryStringBuilder($request->getQueryString()),
-                'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
-                //'type_list' => Vii::createOptionData($mappings_type->toArray(), 'id', ['type_name', 'short_code']),
+                'type_list' => Vii::createOptionData($topic_type->toArray(), 'id', ['type_name']),
+                'tree_data' => Vii::createOptionData($tree_data, 'id', 'tmp_name', ['0'=>'---Root---']) ,
+                
+                //'user' => session()->get('test-name', $full_name)
+            ]
+        );
+    }
+   
+
+    public function postCreateTopic(TopicCreateRequest $request){
+        $form = $request->only(['parent_id', 'topic_name', 'short_name', 'type_id', 'multiple_item']);
+
+        // dd($form);
+
+        if($form['parent_id'] == null){
+            $form['parent_id'] = 0;
+        }
+        else{
+            $form['parent_id'] = intval($form['parent_id']);
+        }
+
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+
+        if($request->get('show_multiple') == null){
+            $item = new Topic($form);
+            $item->company_id = $this->companyId;
+            $item->is_leaf = 1;
+
+            if($item->save()){
+
+                if($form['parent_id'] > 0){
+                    $p = Topic::findOrFail($form['parent_id']);
+                    if($p->is_leaf == 1)
+                        $p->update(['is_leaf' => 0]);
+                }
+
+                return redirect()
+                    ->route('topic', [str_replace('?', '', $qs)])
+                    ->with('success-message', "1 items is created.");
+            }
+
+            // return redirect('/topic' . $qs)->with('success-message', 'ERROR');
+            return redirect()
+                    ->route('topic', [str_replace('?', '', $qs)])
+                    ->with('error-message', 'Cannot create new item.');
+        }
+        else{
+            
+            $items = explode("\r\n", $form['multiple_item']);
+            $data = [];
+            foreach($items as $item){
+                $a = explode('|', $item);
+                $_name = "";
+                $_short = "";
+                if(count($a) == 1){
+                    $_name = $a[0];
+                }
+                else{
+                    $_name = $a[0];
+                    $_short = $a[1];
+                }
+
+                $data[] = [
+                    'parent_id' => $form['parent_id'],
+                    'type_id' => $form['type_id'],
+                    'topic_name' => trim($_name),
+                    'short_name' => trim($_short),
+                    'company_id' => $this->companyId,
+                    'is_leaf' => 1
+                ];
+
+            }
+
+            
+
+            if(Topic::insert($data)){
+
+                if($form['parent_id'] > 0){
+                    $p = Topic::findOrFail($form['parent_id']);
+                    if($p->is_leaf == 1)
+                        $p->update(['is_leaf' => 0]);
+                }
+
+                $c = count($data);
+                
+                return redirect()
+                    ->route('topic', [str_replace('?', '', $qs)])
+                    ->with('success-message', "{$c} items are created.");
+            }
+
+            // return redirect('/topic' . $qs)->with('success-message', 'ERROR');
+            return redirect()
+                    ->route('topic', [str_replace('?', '', $qs)])
+                    ->with('error-message', 'Cannot create new items.');
+        }
+        
+    }
+
+    public function putEditTopic(TopicEditRequest $request, $id=null){
+        $id = $request->post('id');
+
+        $form = $request->only(['parent_id', 'topic_name', 'short_name', 'type_id']);
+        
+        $item = Topic::findOrFail($id);
+
+        $qs = Vii::queryStringBuilder($request->getQueryString());
+        if($item->update($form)){
+            return redirect()
+                    ->route('topic', [str_replace('?', '', $qs)])
+                    ->with('success-message', "Item[with id={$id}] is updated.");
+        }
+
+        return redirect()
+                    ->route('topic', [str_replace('?', '', $qs)])
+                    ->with('error-message', "Cannot update item[with id={$item->id}].");
+    }
+
+    public function getMountLedger(Request $request, $id=null){
+        
+        // $aqs = $request->except('page'); 
+        // // unset($aqs['page']);
+        
+        // $qs = Vii::queryStringBuilder($aqs);
+        
+        // $topic_type = TopicType::all();
+
+        // $root_parent = Topic::getRootParentList();
+       
+        // $fields = ['id', 'topic_name', 'type_id', 'is_leaf'];
+
+        // $tree_data = [];
+        // if(count($root_parent) > 0){
+        //     $tree_data = Topic::createTreeList($root_parent, $fields, true);
+        // }
+
+        // // Paging
+        // $perPage = 15;
+        // $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        // $col = new Collection($tree_data);
+        // $currentPageSearchResults = $col->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        // $entries = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
+        // $entries->withPath(route('topic', [str_replace('?', '', $qs)]));
+
+        // $item = Topic::findOrFail($id);
+
+        // // Account List
+        // $accounts = Account::all();
+
+        //dd($accounts);
+
+
+        return view(
+            'Backend::topic.mount-ledger-topic',
+            [
+                'form_uri' => route('ledger-post-mount'),
+                'page_title' => 'Mount Ledger Key to Item',
+                'qs' => Vii::queryStringBuilder($request->getQueryString()),
                 
                 //'user' => session()->get('test-name', $full_name)
             ]
         );
     }
 
-    public function postCreateAccount(AccountCreateRequest $request){
-       
+    public function postMountLedger(TopicMountRequest $request, $id=null){
+
         $qs = Vii::queryStringBuilder($request->getQueryString());
 
-        if($request->get('show_multiple') == null){
-            $form = $request->only(['account_name', 'account_code']);
-            $account = new Account($form);
-            $account->company_id = $this->companyId;
-            $account->status = 1;
+        if($request->hasFile('data_file')){
+            if($request->file('data_file')->isValid()){
+                $ufile = $request->file('data_file');
+                $ext = $this->getTrueFileExtension($ufile);
+                $reader = $this->createReader($ext);
+                $spreadsheet = $reader->load($ufile->path());
+                $rs = $this->insertTopicLedger($request, $spreadsheet, ($ext == 'csv'));
 
-            if($account->save()){
-                return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('success-message', "1 account is created.");
-            }
 
-            // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
-            return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('error-message', 'Cannot create new account.');
-        }
-        else{
-            
-            if($request->hasFile('data_file')){
-                if($request->file('data_file')->isValid()){
-                    $ufile = $request->file('data_file');
-                    $ext = $this->getTrueFileExtension($ufile);
-                    $reader = $this->createReader($ext);
-                    $spreadsheet = $reader->load($ufile->path());
-                    $rs = $this->importAccount($request, $spreadsheet);
-
-                    if($rs === false){
-                        return redirect()
-                            ->route('account', [str_replace('?', '', $qs)])
-                            ->with('error-message', 'Cannot create new accounts.');
-                    }
-
+                if($rs === false){
                     return redirect()
-                        ->route('account', [str_replace('?', '', $qs)])
-                        ->with('success-message', "{$rs['account']} accounts are created.");
+                        ->route('ledger-mount', [str_replace('?', '', $qs)])
+                        ->with('error-message', 'Cannot glue ledger key to item from file. Some errors are occurred!');
                 }
+    
+                               
+                return redirect()
+                        ->route('ledger-mount', [str_replace('?', '', $qs)])
+                        ->with('success-message', "Glue {$rs['ledger']} ledger key to item from file successfully.");
             }
-
-            return redirect()
-                ->route('account', [str_replace('?', '', $qs)])
-                ->with('error-message', 'Invalid file upload.');
-           
         }
+        // $item_id = $request->input('item_id');
+        // $accounts = $request->input('mounted_account', []);
         
-    }
-
-    public function putEditAccount(AccountEditRequest $request, $id=null){
-        $id = $request->post('id');
-
-        $form = $request->only(['account_code', 'account_name']);
+        // $item = Topic::findOrFail($item_id);
+        // $item->accounts()->detach();
+        // if(count($accounts) > 0) 
+        //     $item->accounts()->attach($accounts);
         
-        $account = Account::findOrFail($id);
+        // $qs = Vii::queryStringBuilder($request->getQueryString());
+        // return redirect()
+        //         ->route('topic', [str_replace('?', '', $qs)]);
 
-        $qs = Vii::queryStringBuilder($request->getQueryString());
-        if($account->update($form)){
-            return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('success-message', "Account[with code={$account->account_code}] is updated.");
-        }
-
-        return redirect()
-                    ->route('account', [str_replace('?', '', $qs)])
-                    ->with('error-message', "Cannot update account[with code={$account->account_code}].");
     }
-
-    private function importAccount($request, $spreadsheet){
+    
+    private function insertTopicLedger($request, $spreadsheet, $is_csv=false){
         $worksheet = $spreadsheet->getActiveSheet();
         $highestRow = $worksheet->getHighestRow(); // e.g. 10
         $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
@@ -164,35 +302,32 @@ class AccountController extends Controller{
 
         $data = [];
         for($row=1; $row<=$highestRow; $row++){
-            if($row == 1 && $request->post('skip_first_line') != null)
+            if($row == 1 && $request->post('skip_headers') != null)
                 continue;
 
-            $_code = trim($worksheet->getCellByColumnAndRow(1, $row)->getValue());
-            $_name = trim($worksheet->getCellByColumnAndRow(2, $row)->getValue());
+            $item_id = trim($worksheet->getCellByColumnAndRow(1, $row)->getValue());
+            $ledger_key = str_replace(['_#BLANK#'], '', trim($worksheet->getCellByColumnAndRow(2, $row)->getValue()));
 
-            if(array_key_exists($_code, $data) || $_code == '')
-                continue;
-
-            $data[$_code] = [
-                'account_code' => $_code,
-                'account_name' => $_name,
-                'company_id' => $this->companyId,
-                'status' => 1
+            $data[] = [
+                'mappings_code' => $item_id,
+                'ledger_code' => $ledger_key,
+                'company_id' => $this->companyId
             ];
         }
 
+        //dd($data);
         $rs = [
-            'account' => 0
+            'ledger' => 0
         ];
 
         $done = true;
         
         if(count($data) > 0){
             foreach(collect($data)->chunk(100) as $subset){
-                $done = $done & Account::insert($subset->toArray());
+                $done = $done & DB::table('ledger_item')->insert($subset->toArray());
             }
 
-            $rs['account'] = count($data);
+            $rs['ledger'] = count($data);
         }
 
         if($done){
@@ -202,17 +337,7 @@ class AccountController extends Controller{
         return $done;
     }
 
-    public function getChangeStatus(Request $request, $id=null){
-        $model = Account::findOrFail($id);
-        $val = 1 - $model->status;
-        $model->update(['status'=> $val]);
-
-        $qs = Vii::queryStringBuilder($request->getQueryString());
-        return redirect()
-                ->route('account', [str_replace('?', '', $qs)]);
-    }
-
-    // Account Dimension
+    // Topic Dimension
     public function getDimension(Request $request, $id=null){
 
         $display_rows = $request->input('rows_per_page', 15);
@@ -222,19 +347,20 @@ class AccountController extends Controller{
         $paging_qs = Vii::queryStringBuilder($aqs);
 
         
+
         $entries = Dimension::join('dimension_type', 'dimension_type.id', '=', 'dimension.dim_type')
-            ->where('dimension_type.typical_name', 'account')
+            ->where('dimension_type.typical_name', 'topic')
             ->where('dimension.company_id', $this->companyId)
             ->select('dimension.*')
             ->orderBy('dimension.dim_type', 'ASC')
             ->orderBy('dimension.dim_code', 'ASC')
             ->paginate($display_rows);
         
-        $entries->withPath(route('account-dimension', [str_replace('?', '', $paging_qs)]));
+        $entries->withPath(route('topic-dimension', [str_replace('?', '', $paging_qs)]));
 
         $companies = Company::all();
 
-        $dim_type = DimensionType::where('typical_name', 'account')->get();
+        $dim_type = DimensionType::where('typical_name', 'topic')->get();
         
         //dd($entries->toArray());
 
@@ -251,7 +377,7 @@ class AccountController extends Controller{
                     'dim' => $dim,
                     'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
                     'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
-                    'typical_name' => 'Account'
+                    'typical_name' => 'Topic'
                     
                     
                     //'user' => session()->get('test-name', $full_name)
@@ -269,7 +395,7 @@ class AccountController extends Controller{
                 'qs' => Vii::queryStringBuilder($request->getQueryString()),
                 'companies' => Vii::createOptionData($companies->toArray(), 'id', ['company_name']),
                 'type_list' => Vii::createOptionData($dim_type->toArray(), 'id', ['type_name']),
-                'typical_name' => 'Account'
+                'typical_name' => 'Topic'
                 //'user' => session()->get('test-name', $full_name)
             ]
         );
@@ -287,13 +413,13 @@ class AccountController extends Controller{
 
             if($dim->save()){
                 return redirect()
-                    ->route('account-dimension', [str_replace('?', '', $qs)])
+                    ->route('topic-dimension', [str_replace('?', '', $qs)])
                     ->with('success-message', "1 dimension is created.");
             }
 
             // return redirect('/mappings-item' . $qs)->with('success-message', 'ERROR');
             return redirect()
-                    ->route('account-dimension', [str_replace('?', '', $qs)])
+                    ->route('topic-dimension', [str_replace('?', '', $qs)])
                     ->with('error-message', 'Cannot create new dimension.');
         }
         else{
@@ -308,12 +434,12 @@ class AccountController extends Controller{
 
                     if($rs === false){
                         return redirect()
-                            ->route('account-dimension', [str_replace('?', '', $qs)])
+                            ->route('topic-dimension', [str_replace('?', '', $qs)])
                             ->with('error-message', 'Cannot create new dimensions.');
                     }
 
                     return redirect()
-                        ->route('account-dimension', [str_replace('?', '', $qs)])
+                        ->route('topic-dimension', [str_replace('?', '', $qs)])
                         ->with('success-message', "{$rs['dim']} dimensions are created.");
 
                 }
@@ -350,7 +476,7 @@ class AccountController extends Controller{
     public function getMountDimension(Request $request, $id=null){
         
         return view(
-            'Backend::account.mount-dimension-account',
+            'Backend::topic.mount-dimension-topic',
             [
                 'form_uri' => route('topic-dimension-post-mount'),
                 'page_title' => 'Mount Diemsion To Topic',
@@ -371,7 +497,7 @@ class AccountController extends Controller{
                 $ext = $this->getTrueFileExtension($ufile);
                 $reader = $this->createReader($ext);
                 $spreadsheet = $reader->load($ufile->path());
-                $rs = $this->insertAccountDimension($request, $spreadsheet, ($ext == 'csv'));
+                $rs = $this->insertTopicDimension($request, $spreadsheet, ($ext == 'csv'));
 
 
                 if($rs === false){
@@ -447,7 +573,7 @@ class AccountController extends Controller{
         return $done;
     }
 
-    private function insertAccountDimension($request, $spreadsheet, $is_csv=false){
+    private function insertTopicDimension($request, $spreadsheet, $is_csv=false){
         $worksheet = $spreadsheet->getActiveSheet();
         $highestRow = $worksheet->getHighestRow(); // e.g. 10
         $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
@@ -458,11 +584,11 @@ class AccountController extends Controller{
             if($row == 1 && $request->post('skip_headers') != null)
                 continue;
 
-            $account_code = trim($worksheet->getCellByColumnAndRow(1, $row)->getValue());
+            $topic_id = trim($worksheet->getCellByColumnAndRow(1, $row)->getValue());
             $dim_code = trim($worksheet->getCellByColumnAndRow(2, $row)->getValue());
 
             $data[] = [
-                'account_code' => intval($account_code),
+                'topic_id' => intval($topic_id),
                 'dim_code' => $dim_code,
                 'company_id' => $this->companyId,
             ];
@@ -477,7 +603,7 @@ class AccountController extends Controller{
         
         if(count($data) > 0){
             foreach(collect($data)->chunk(100) as $subset){
-                $done = $done & DB::table('account_dimension')->insert($subset->toArray());
+                $done = $done & DB::table('topic_dimension')->insert($subset->toArray());
             }
 
             $rs['dim'] = count($data);

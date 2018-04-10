@@ -1,7 +1,7 @@
     
     <div class="tile">
         <h4 class="tile-title">
-            Dimension List
+            {{$typical_name}} Dimension List
             @if(session()->has('error-message'))
                 <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
             @endif
@@ -29,15 +29,21 @@
                         <td>{{ $item->dimension_type->type_name }}</td>
                         <td>
                         @if($item->status == 1)
-                            {{--  <span class="badge badge-info">On</span>  --}}
-                            <a href="{{ route('dimension-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-info">On</a>
+                             <span class="badge badge-info">On</span> 
+                            {{-- <a href="{{ route('dimension-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-info">On</a> --}}
                         @else
-                            {{--  <span class="badge badge-secondary">Off</span>  --}}
-                            <a href="{{ route('dimension-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-secondary">Off</a>
+                             <span class="badge badge-secondary">Off</span> 
+                            {{-- <a href="{{ route('dimension-get-status', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="badge badge-secondary">Off</a> --}}
                         @endif
                         </td>
                         <td>
-                        <a href="{{ route('dimension-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
+                        <?php
+                            $edit_route = route('topic-dimension-edit', ['id' => $item->id, str_replace('?', '', $qs)]);
+                            if(strtolower($typical_name) == 'account'){
+                                $edit_route = route('account-dimension-edit', ['id' => $item->id, str_replace('?', '', $qs)]);
+                            }
+                        ?>
+                        <a href="{{ $edit_route }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
                         
                             
                         </td>

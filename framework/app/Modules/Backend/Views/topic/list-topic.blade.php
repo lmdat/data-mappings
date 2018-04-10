@@ -1,7 +1,7 @@
     
     <div class="tile">
         <h4 class="tile-title">
-            Item List
+            Topic List
             @if(session()->has('error-message'))
                 <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
             @endif
@@ -15,9 +15,10 @@
                     <thead class="thead-dark">
                         <tr>
                             <th>Code</th>
-                            <th>Item Name</th>
+                            <th>Topic Name</th>
                             <th>Type</th>
                             <th>Ledger Key</th>
+                            <th>Dimension Code</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -25,14 +26,14 @@
                         @foreach($entries as $k=>$item)
                         <tr @if($item->id == @$curr_id) class='table-primary' @endif>
                             <td>{{ $item->id }}</td>
-                            <td>{!! $item->tmp_name !!}</td>
-                            <td>{{ $item->mappings_type->type_name }}</td>
+                            <td @if($item->is_leaf == 0) class='text-info font-weight-bold' @endif>{!! $item->tmp_name !!}</td>
+                            <td>{{ $item->topic_type->type_name }}</td>
                             <td>
                             <?php
                                 //$ledgers = $item->with('ledger_item')->get();
                                 $pivot = [];
                                 if($item->is_leaf == 1){
-                                    $pivot = DB::table('ledger_item')->where('mappings_code', $item->id)
+                                    $pivot = DB::table('ledger_topic')->where('topic_code', $item->id)
                                         ->where('company_id', session()->get('selected_company'))
                                         ->get();
                                 }
@@ -45,7 +46,24 @@
                             
                             </td>
                             <td>
-                                <a href="{{ route('mappings-item-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
+                                <?php
+                                    //$ledgers = $item->with('topic_dimension')->get();
+                                    $pivot = [];
+                                    if($item->is_leaf == 1){
+                                        $pivot = DB::table('topic_dimension')->where('topic_id', $item->id)
+                                            ->where('company_id', session()->get('selected_company'))
+                                            ->get();
+                                    }
+                                    $n = count($pivot);
+                                ?>
+                                @for($i=0; $i<$n; $i++)
+                                <i class="fa fa-check-square-o"></i><small>{{$pivot[$i]->dim_code}}</small>@if($i < $n - 1)&nbsp;@endif
+                                    @if($i % $n == 2) <br/> @endif
+                                @endfor
+                                
+                            </td>
+                            <td>
+                                <a href="{{ route('topic-edit', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-warning" role="button"><i class="fa fa-edit"></i>Edit</a>
                             {{--  @if($item->is_leaf == 1)
                                 <a href="{{ route('account-mount', ['id' => $item->id, str_replace('?', '', $qs)]) }}" class="btn btn-sm btn-info" role="button"><i class="fa fa-link"></i>Mount</a>
                             @endif  --}}

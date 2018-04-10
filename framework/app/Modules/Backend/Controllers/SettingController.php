@@ -18,8 +18,10 @@ class SettingController extends Controller{
         $table_names[] = (new \App\Models\Ledger())->getTable();
         $table_names[] = (new \App\Models\UploadLedger())->getTable();
         $table_names[] = (new \App\Models\UploadRevision())->getTable();
-        $table_names[] = 'ledger_item';
+        $table_names[] = 'ledger_topic';
         $table_names[] = (new \App\Models\Account())->getTable();
+        $table_names[] = 'account_dimension';
+        $table_names[] = 'topic_dimension';
         $table_names[] = (new \App\Models\Dimension())->getTable();
         
 
@@ -46,7 +48,20 @@ class SettingController extends Controller{
 
         if(count($tables) > 0){
             foreach($tables as $t){
-                \Illuminate\Support\Facades\DB::table($t)->truncate();
+                if($t == 'account_dimension'){
+                    \Illuminate\Support\Facades\DB::table($t)->truncate();
+                    \App\Models\Dimension::join('dimension_type', 'dimension_type.id', '=', 'dimension.dim_type')
+                    ->where('dimension_type.typical_name', 'account')->delete();
+                }
+                elseif($t == 'topic_dimension'){
+                    \Illuminate\Support\Facades\DB::table($t)->truncate();
+                    \App\Models\Dimension::join('dimension_type', 'dimension_type.id', '=', 'dimension.dim_type')
+                    ->where('dimension_type.typical_name', 'topic')->delete();
+                }
+                else{
+                    \Illuminate\Support\Facades\DB::table($t)->truncate();
+                }
+                
             }
 
             return redirect()->route('truncate-table', [str_replace('?', '', $qs)])

@@ -7,8 +7,8 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Define Account</h1>
-        <p>Import data of Account</p>
+        <h1><i class="fa fa-location-arrow"></i> Create/Edit Account</h1>
+        <p>Create Account</p>
     </div>
 </div>
 
@@ -61,7 +61,7 @@
                     <div class="form-group">
                         <label class="control-label">Data File(xls, xlsx, csv)</label>
                         {!! Form::file('data_file', ['id'=>'data_file', 'accept'=>'.csv, .xls, .xlsx', 'class' => 'form-control']) !!}
-                        <small class="form-text text-muted">The order of colunms: <strong>ACCOUNT-CODE;ACCOUNT-NAME</strong></small>
+                        <small class="form-text text-muted">The order of colunms: <strong>ACCOUNT-CODE | ACCOUNT-NAME</strong></small>
                         @if ($errors->has('data_file'))<p class="text-danger"><small>{!!$errors->first('data_file')!!}</small></p> @endif
                     </div>
 

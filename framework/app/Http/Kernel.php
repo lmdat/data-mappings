@@ -46,6 +46,8 @@ class Kernel extends HttpKernel
         'route_authorization' => [
             \App\Modules\Backend\Middleware\BackendAuthorization::class,
         ],
+
+        
     ];
 
     /**
@@ -66,6 +68,11 @@ class Kernel extends HttpKernel
         'backend_auth' => \App\Modules\Backend\Middleware\BackendAuth::class,
         'route_authorization' =>  \App\Modules\Backend\Middleware\BackendAuthorization::class,
 
-        'company_selection' => \App\Modules\Backend\Middleware\CompanySelection::class
+        'company_selection' => \App\Modules\Backend\Middleware\CompanySelection::class,
+
+        'jwt.auth' => 'Tymon\JWTAuth\Middleware\GetUserFromToken',
+        'jwt.refresh' => 'Tymon\JWTAuth\Middleware\RefreshToken',
+
+        'jwt.token-auth' => \App\Modules\Api\Middleware\TokenAuthentication::class,
     ];
 }

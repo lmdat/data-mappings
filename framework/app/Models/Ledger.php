@@ -13,6 +13,7 @@ class Ledger extends Model{
         'company_id',
         'account_code',
         'ledger_key',
+        'ledger_code',
         'base_amount',
         'accounting_period',
         'year',
@@ -29,8 +30,8 @@ class Ledger extends Model{
         'id'
     ];
 
-    public function items(){
-        return $this->belongsToMany('App\Models\MappingsItem', 'ledger_item', 'ledger_code', 'mappings_code', 'ledger_code');
+    public function topics(){
+        return $this->belongsToMany('App\Models\Topic', 'ledger_topic', 'ledger_code', 'topic_code', 'ledger_key');
     }
 
     public function upload_revision(){

@@ -7,21 +7,21 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Define Mappings Item</h1>
-        <p>Import data of item from excel or csv file</p>
+        <h1><i class="fa fa-location-arrow"></i> Create/Edit Topic</h1>
+        <p>Edit Topic</p>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-8">
-        @include('Backend::mappings-item.list-define-item', ['entries' => $entries, 'qs' => $qs, 'curr_id' => $item->id])
+        @include('Backend::topic.list-topic', ['entries' => $entries, 'qs' => $qs, 'curr_id' => $item->id])
     </div>
 
     <div class="col-md-4">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'put', 'name' => 'itemForm', 'id' => 'itemForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Edit Item
+                Edit Topic
                 {{--  @if(session()->has('error-message'))
                     <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
                 @endif
@@ -32,7 +32,7 @@
             </h4>
             <div class="tile-body">
                 <div class="form-group">
-                    <label class="control-label">Mappings Type <span class="text-danger">*</span></label>
+                    <label class="control-label">Topic Type <span class="text-danger">*</span></label>
                     {!! Form::select('type_id', $type_list, old('type_id', $item->type_id), ['class' => 'form-control', 'id' => 'type_id']) !!}
                     @if ($errors->has('type_id'))<p class="text-danger"><small>{!!$errors->first('type_id')!!}</small></p> @endif  
                 </div>
@@ -44,13 +44,13 @@
 
                 <div class="form-group row">
                     <div class="col-md-6">
-                        <label class="control-label">Item Name <span class="text-danger">*</span></label>
-                        {!! Form::text('item_name', old('item_name', $item->item_name), ['id'=>'item_name', 'class' => 'form-control']) !!}
-                        @if ($errors->has('item_name'))<p class="text-danger"><small>{!!$errors->first('item_name')!!}</small></p> @endif  
+                        <label class="control-label">Topic Name <span class="text-danger">*</span></label>
+                        {!! Form::text('topic_name', old('topic_name', $item->topic_name), ['id'=>'item_name', 'class' => 'form-control']) !!}
+                        @if ($errors->has('topic_name'))<p class="text-danger"><small>{!!$errors->first('topic_name')!!}</small></p> @endif  
                    </div>
 
                    <div class="col-md-6">
-                         <label class="control-label">Short Name <span class="text-danger">*</span></label>
+                         <label class="control-label">Short Name</label>
                          {!! Form::text('short_name', old('short_name', $item->short_name), ['id'=>'short_name', 'class' => 'form-control']) !!}
                          @if ($errors->has('short_name'))<p class="text-danger"><small>{!!$errors->first('short_name')!!}</small></p> @endif  
                    </div>
@@ -68,7 +68,7 @@
                 </div>  --}}
             </div>
             <div class="tile-footer text-right">
-                <a href="{{ route('mappings-item', [str_replace('?', '', $qs)]) }}" class="btn btn-danger" role="button"><i class="fa fa-reply"></i>Back</a>
+                <a href="{{ route('topic', [str_replace('?', '', $qs)]) }}" class="btn btn-danger" role="button"><i class="fa fa-reply"></i>Back</a>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i>Save</button>
             </div>
             

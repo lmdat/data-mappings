@@ -11,7 +11,9 @@ return [
         'select_company' => 'Select Company',
 
     'account' => 'Account',
-        'define_account' => 'Define Account',
+        'create_edit_account' => 'Create/Edit Account',
+		'account_dimension' => 'Dimension',
+		'account_dimension_mount' => 'Mount Dimension To Account',
 
     'dimension' => 'Dimension',
         'define_dimension' => 'Define Dimension',
@@ -21,15 +23,13 @@ return [
         'import_ledger' => 'Import Ledger',
         'ledger_revision' => 'Revision',
 
-    'mappings_item' => 'Mappings Item',
-        'define_mappings_item' => 'Define Item',
-        'item_attribute' => 'Item Attribute',
-        'mappings_item_account' => 'Mount Ledger to Item',
+    'topic' => 'Topic',
+        'create_edit_topic' => 'Create/Edit Topic',
+		'topic_dimension' => 'Dimension',
+		'topic_dimension_mount' => 'Mount Dimension To Topic',
+        'topic_ledger_mapping' => 'Mount Ledger to Topic',
     
-
-    'mapping_item' => 'Mapping Item',
-        'catalog_list' => 'Danh Sách Catalog',
-        'add_catalog' => 'Tạo Catalog',
+    
 
     // 'product_management' => 'Sản Phẩm',
     //     'product_list' => 'Danh Sách Sản Phẩm',

@@ -26,7 +26,7 @@ class DimensionCreateRequest extends Request{
             'dim_name' => 'required_without:show_multiple',
             'dim_code' => 'required_without:show_multiple',
             // 'data_file' => 'required_with:show_multiple|max:10240|mimes:csv,xls,xlsx,txt'
-            'data_file' => 'required|max:10240|mimetypes:text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            'data_file' => 'required_with:show_multiple|max:10240|mimetypes:text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             // 'role_id' => 'required'
             //'total_prize' => 'required|integer|min:1',
         ];

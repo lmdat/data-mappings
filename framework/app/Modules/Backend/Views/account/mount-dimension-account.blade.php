@@ -7,8 +7,8 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i>Mount Ledger Key to Item</h1>
-        <p>Glue Item Code with Ledger Key</p>
+        <h1><i class="fa fa-location-arrow"></i>Mount Dimension To Account</h1>
+        <p>Glue Dimension Code To Account Code</p>
     </div>
 </div>
 
@@ -30,7 +30,7 @@
                 <div class="form-group">
                     <label class="control-label">Data File(xls, xlsx, csv)</label>
                     {!! Form::file('data_file', ['id'=>'data_file', 'accept'=>'.csv, .xls, .xlsx', 'class' => 'form-control']) !!}
-                    <small class="form-text text-muted">Order of Column: MAPPING_ITEM_ID | LEDGER_KEY</small>
+                    <small class="form-text text-muted">Order of Column: ACCOUNT_CODE | DIMENSION_CODE</small>
                     @if ($errors->has('data_file'))<p class="text-danger"><small>{!!$errors->first('data_file')!!}</small></p> @endif 
                 </div>  
                 <div class="animated-checkbox">
@@ -43,7 +43,6 @@
                 
             </div>
             <div class="tile-footer text-right">
-                    <a href="{{ route('mappings-item', [str_replace('?', '', $qs)]) }}" class="btn btn-danger" role="button"><i class="fa fa-reply"></i>Back</a>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i>Save</button>
             </div>
             

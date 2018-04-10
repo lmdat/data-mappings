@@ -198,7 +198,7 @@ trait SidebarMenuTrait{
 
             [
                 'id' => '',
-                'text' => trans($lang_mod . '.mappings_item'),
+                'text' => trans($lang_mod . '.topic'),
                 'url' => '#',
                 'params' => [],
                 'icon' => "<i class='app-menu__icon fa fa-list-ol' aria-hidden='true'></i>",
@@ -206,8 +206,8 @@ trait SidebarMenuTrait{
                 'children' => [
                     [
                         'id' => '41',
-                        'text' => trans($lang_mod . '.define_mappings_item'),
-                        'url' => 'mappings-item',
+                        'text' => trans($lang_mod . '.create_edit_topic'),
+                        'url' => route('topic'),
                         'params' => [],
                         'icon' => "<i class='fa fa-angle-double-right'></i>",
                         'level-icon' => "",
@@ -216,8 +216,26 @@ trait SidebarMenuTrait{
 
                     [
                         'id' => '42',
-                        'text' => trans($lang_mod . '.mappings_item_account'),
-                        'url' => 'mappings-item/mount',
+                        'text' => trans($lang_mod . '.topic_dimension'),
+                        'url' => route('topic-dimension'),
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
+                    [
+                        'id' => '43',
+                        'text' => trans($lang_mod . '.topic_dimension_mount'),
+                        'url' => route('topic-dimension-mount'),
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
+                    [
+                        'id' => '44',
+                        'text' => trans($lang_mod . '.topic_ledger_mapping'),
+                        'url' => route('ledger-mount'),
                         'params' => [],
                         'icon' => "<i class='fa fa-angle-double-right'></i>",
                         'level-icon' => "",
@@ -237,29 +255,26 @@ trait SidebarMenuTrait{
                 'children' => [
                     [
                         'id' => '51',
-                        'text' => trans($lang_mod . '.define_account'),
-                        'url' => 'account',
+                        'text' => trans($lang_mod . '.create_edit_account'),
+                        'url' => route('account'),
                         'params' => [],
                         'icon' => "<i class='fa fa-angle-double-right'></i>",
                         'level-icon' => "",
                         'children' => []
                     ],
-
-                ]
-            ],
-
-            [
-                'id' => '',
-                'text' => trans($lang_mod . '.dimension'),
-                'url' => '#',
-                'params' => [],
-                'icon' => "<i class='app-menu__icon fa fa-th' aria-hidden='true'></i>",
-                'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
-                'children' => [
                     [
-                        'id' => '61',
-                        'text' => trans($lang_mod . '.define_dimension'),
-                        'url' => 'dimension',
+                        'id' => '51',
+                        'text' => trans($lang_mod . '.account_dimension'),
+                        'url' => route('account-dimension'),
+                        'params' => [],
+                        'icon' => "<i class='fa fa-angle-double-right'></i>",
+                        'level-icon' => "",
+                        'children' => []
+                    ],
+                    [
+                        'id' => '51',
+                        'text' => trans($lang_mod . '.account_dimension_mount'),
+                        'url' => route('account-dimension-mount'),
                         'params' => [],
                         'icon' => "<i class='fa fa-angle-double-right'></i>",
                         'level-icon' => "",
@@ -268,6 +283,27 @@ trait SidebarMenuTrait{
 
                 ]
             ],
+
+            // [
+            //     'id' => '',
+            //     'text' => trans($lang_mod . '.dimension'),
+            //     'url' => '#',
+            //     'params' => [],
+            //     'icon' => "<i class='app-menu__icon fa fa-th' aria-hidden='true'></i>",
+            //     'level-icon' => "<i class='treeview-indicator fa fa-angle-right pull-right' aria-hidden='true'></i>",
+            //     'children' => [
+            //         [
+            //             'id' => '61',
+            //             'text' => trans($lang_mod . '.define_dimension'),
+            //             'url' => 'dimension',
+            //             'params' => [],
+            //             'icon' => "<i class='fa fa-angle-double-right'></i>",
+            //             'level-icon' => "",
+            //             'children' => []
+            //         ],
+
+            //     ]
+            // ],
 
             [
                 'id' => '',

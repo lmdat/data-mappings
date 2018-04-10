@@ -1,9 +1,9 @@
 <?php
-namespace App\Modules\Backend\Requests\Item;
+namespace App\Modules\Backend\Requests\Topic;
 
 use App\Modules\Backend\Requests\Request;
 
-class ItemEditRequest extends Request{
+class TopicEditRequest extends Request{
 
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +23,8 @@ class ItemEditRequest extends Request{
     public function rules(){
         return [
             'type_id' => 'required',
-            'item_name' => 'required',
-            'short_name' => 'required',
+            'topic_name' => 'required',
+            // 'short_name' => 'required',
             //'total_prize' => 'required|integer|min:1',
         ];
     }
@@ -32,8 +32,8 @@ class ItemEditRequest extends Request{
     public function messages(){
         return [
             'type_id.required' => '[Mapping Type] Select one',
-            'item_name.required' => '[Item Name] cannot be blank',
-            'short_name.required' => '[Short Name] cannot be blank',
+            'topic_name.required' => '[Item Name] cannot be blank',
+            // 'short_name.required' => '[Short Name] cannot be blank',
         ];
     }
 }

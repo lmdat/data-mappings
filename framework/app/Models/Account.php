@@ -21,13 +21,10 @@ class Account extends Model{
     ];
 
     public function dimensions(){
-        return $this->belongsToMany('App\Models\Dimension', 'account_dimension', 'account_id', 'dim_id');
+        return $this->belongsToMany('App\Models\Dimension', 'account_dimension', 'account_code', 'dim_code', 'account_code', 'dim_code');
     }
 
-    public function items(){
-        return $this->belongsToMany('App\Models\MappingsItem', 'account_item', 'account_code', 'mapping_code', 'account_code');
-    }
-
+    
     public function company(){
         return $this->belongsTo('App\Models\Company', 'company_id');
     }

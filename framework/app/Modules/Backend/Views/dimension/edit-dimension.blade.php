@@ -7,21 +7,21 @@
 @section('content')
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-location-arrow"></i> Define Dimension</h1>
-        <p>Import data of Dimension</p>
+        <h1><i class="fa fa-location-arrow"></i> Create/Edit {{$typical_name}} Dimension</h1>
+        <p>Edit {{$typical_name}} Dimension</p>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-8">
-        @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs, 'curr_id' => $dim->id])
+        @include('Backend::dimension.list-dimension', ['entries' => $entries, 'qs' => $qs, 'curr_id' => $dim->id, 'typical_name' => $typical_name])
     </div>
 
     <div class="col-md-4">
         {!! Form::open(['url' => $form_uri . $qs, 'method' => 'put', 'name' => 'dimForm', 'id' => 'dimForm', 'role' => 'form', 'files' => false]) !!}
         <div class="tile">
             <h4 class="tile-title">
-                Edit Account
+                Edit {{$typical_name}} Dimension
                 {{--  @if(session()->has('error-message'))
                     <small><label class="badge badge-danger">Oh snap! {{ session()->get('error-message') }}</label></small>
                 @endif
@@ -68,7 +68,7 @@
                 </div>  --}}
             </div>
             <div class="tile-footer text-right">
-                <a href="{{ route('dimension', [str_replace('?', '', $qs)]) }}" class="btn btn-danger" role="button"><i class="fa fa-reply"></i>Back</a>
+                <a href="{{ route('topic-dimension', [str_replace('?', '', $qs)]) }}" class="btn btn-danger" role="button"><i class="fa fa-reply"></i>Back</a>
                 <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i>Save</button>
             </div>
             

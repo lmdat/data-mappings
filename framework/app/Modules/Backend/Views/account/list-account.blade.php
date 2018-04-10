@@ -16,6 +16,7 @@
                     <tr>
                         <th>Code</th>
                         <th>Account Name</th>
+                        <th>Dimension Code</th>
                         <th>Status</th>
                         <th></th>
                     </tr>
@@ -26,12 +27,26 @@
                         <td>{{ $item->account_code }}</td>
                         <td>{{ $item->account_name }}</td>
                         <td>
+                            <?php
+                                //$ledgers = $item->with('topic_dimension')->get();
+                                $pivot = DB::table('account_dimension')->where('account_code', $item->account_code)
+                                        ->where('company_id', session()->get('selected_company'))
+                                        ->get();
+                                $n = count($pivot);
+                            ?>
+                            @for($i=0; $i<$n; $i++)
+                            <i class="fa fa-check-square-o"></i><small>{{$pivot[$i]->dim_code}}</small>@if($i < $n - 1)&nbsp;@endif
+                                @if($i % $n == 2) <br/> @endif
+                            @endfor
+                            
+                        </td>
+                        <td>
                         @if($item->status == 1)
-                            {{--  <span class="badge badge-info">On</span>  --}}
-                            <a href="{{route('account-get-status', ['id' => $item->id, str_replace('?', '', $qs)])}}" class="badge badge-info">On</a>
+                             <span class="badge badge-info">On</span> 
+                            {{-- <a href="{{route('account-get-status', ['id' => $item->id, str_replace('?', '', $qs)])}}" class="badge badge-info">On</a> --}}
                         @else
-                            {{--  <span class="badge badge-secondary">Off</span>  --}}
-                            <a href="{{route('account-get-status', ['id' => $item->id, str_replace('?', '', $qs)])}}" class="badge badge-secondary">Off</a>
+                             <span class="badge badge-secondary">Off</span> 
+                            {{-- <a href="{{route('account-get-status', ['id' => $item->id, str_replace('?', '', $qs)])}}" class="badge badge-secondary">Off</a> --}}
                         @endif
                         </td>
                         <td>

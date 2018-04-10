@@ -3,23 +3,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MappingsType extends Model{
+class TopicType extends Model{
 
-    protected $table = 'mappings_type';
+    protected $table = 'topic_type';
     public $timestamps = false;
     //public $incrementing = false;
 
     protected $fillable = [
         'type_name',
-        'short_code',
-        'company_id'
+        'company_id',
+        'status'
     ];
 
     protected $guarded = [
         'id'
     ];
 
-    public function items(){
-        return $this->hasMany('App\Models\MappingsItem', 'type_id');
+    public function topics(){
+        return $this->hasMany('App\Models\Topic', 'type_id');
     }
 }

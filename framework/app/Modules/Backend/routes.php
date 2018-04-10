@@ -77,27 +77,39 @@ Route::group([
            
     });
 
-    // Mappings Item
+    // Topic
     Route::group(
         [
-            'prefix' => 'mappings-item',
+            'prefix' => 'topic',
             //'middleware' => ['admin_permission'],
      
             //'roles' => [700]
         ], function(){
 
         
-        Route::match(['get', 'post'], '/', ['uses' => 'MappingsItemController@getItem'])->name('mappings-item');
+        Route::match(['get', 'post'], '/', ['uses' => 'TopicController@getTopic'])->name('topic');
 
-        Route::match(['get', 'post'], 'edit/{id?}', ['uses' => 'MappingsItemController@getItem'])->name('mappings-item-edit');
+        Route::match(['get', 'post'], 'edit/{id?}', ['uses' => 'TopicController@getTopic'])->name('topic-edit');
 
-        Route::post('/create', ['uses' => 'MappingsItemController@postCreateItem'])->name('mappings-item-post-create');
+        Route::post('/create', ['uses' => 'TopicController@postCreateTopic'])->name('topic-post-create');
  
-        Route::put('/edit/{id}', ['uses' => 'MappingsItemController@putEditItem'])->name('mappings-item-put-edit');
+        Route::put('/edit/{id}', ['uses' => 'TopicController@putEditTopic'])->name('topic-put-edit');
 
-        Route::get('/mount', ['uses' => 'MappingsItemController@getMountAccount'])->name('ledger-mount');
+        Route::get('/dimension', ['uses' => 'TopicController@getDimension'])->name('topic-dimension');
+        
+        Route::get('/dimension-edit/{id?}', ['uses' => 'TopicController@getDimension'])->name('topic-dimension-edit');
 
-        Route::post('/mount', ['uses' => 'MappingsItemController@postMountAccountItem'])->name('ledger-post-mount');
+        Route::get('/dimension-mount', ['uses' => 'TopicController@getMountDimension'])->name('topic-dimension-mount');
+
+        Route::post('/dimension-mount', ['uses' => 'TopicController@postMountDimension'])->name('topic-dimension-post-mount');
+
+        Route::post('/dimension-create', ['uses' => 'TopicController@postCreateDimension'])->name('topic-dimension-post-create');
+
+        Route::put('/dimension-edit', ['uses' => 'TopicController@postEditDimension'])->name('topic-dimension-put-edit');
+
+        Route::get('/ledger-mount', ['uses' => 'TopicController@getMountLedger'])->name('ledger-mount');
+
+        Route::post('/ledger-mount', ['uses' => 'TopicController@postMountLedger'])->name('ledger-post-mount');
         // Route::post('/ordering', ['uses' => 'CategoryController@postOrderingCategory']);
 
         // Route::get('/published/{id}', ['uses' => 'CategoryController@getPublishedCategory']);
@@ -123,6 +135,18 @@ Route::group([
         Route::put('/edit/{id}', ['uses' => 'AccountController@putEditAccount'])->name('account-put-edit');
 
         Route::get('/status/{id}', ['uses' => 'AccountController@getChangeStatus'])->name('account-get-status');
+
+        Route::get('/dimension', ['uses' => 'AccountController@getDimension'])->name('account-dimension');
+        
+        Route::get('/dimension-edit/{id?}', ['uses' => 'AccountController@getDimension'])->name('account-dimension-edit');
+
+        Route::get('/dimension-mount', ['uses' => 'AccountController@getMountDimension'])->name('account-dimension-mount');
+
+        Route::post('/dimension-mount', ['uses' => 'AccountController@postMountDimension'])->name('account-dimension-post-mount');
+
+        Route::post('/dimension-create', ['uses' => 'AccountController@postCreateDimension'])->name('account-dimension-post-create');
+
+        Route::put('/dimension-edit', ['uses' => 'AccountController@postEditDimension'])->name('account-dimension-put-edit');
 
 
     });
