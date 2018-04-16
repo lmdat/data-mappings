@@ -55,11 +55,18 @@ class Topic extends Model{
 
 
     /*----- BACKEND FUNCTION -----*/
-    public static function getRootParentList($com_id=null){
+    public static function getRootParentList($fields=['*'], $com_id=null){
 
-        $fields = ['id', 'parent_id', 'topic_name', 'type_id'];
+        // $fields = ['id', 'parent_id', 'topic_name', 'type_id', 'is_leaf'];
 
-        $sql = Topic::where('parent_id', 0);
+        $sql = Topic::with('topic_type:topic_type.id,topic_type.type_name')
+            ->with(['ledgers' => function($q){
+                $q->select(['ledger.ledger_key'])->distinct();
+            }])
+            ->with(['dimensions' => function($q){
+                $q->select(['dimension.dim_code'])->distinct();
+            }])
+            ->where('parent_id', 0);
         if($com_id != null)
             $sql->where('company_id', $com_id);
         
@@ -70,7 +77,7 @@ class Topic extends Model{
         return $root_parent;
     }
     
-    public static function createTreeList($parents, $fields=[], $com_id=null, $is_trait=false){
+    public static function createTreeList($parents, $fields=['*'], $com_id=null, $is_trait=false){
         
         if(empty($parents))
             return [];
@@ -84,19 +91,35 @@ class Topic extends Model{
 
             $children = null;
             if($com_id == null){
-                $children = $parent->children()->select($fields)
+                $children = $parent->children()
+                    ->with('topic_type:topic_type.id,topic_type.type_name')
+                    ->with(['ledgers' => function($q){
+                        $q->select(['ledger.ledger_key'])->distinct();
+                    }])
+                    ->with(['dimensions' => function($q){
+                        $q->select(['dimension.dim_code'])->distinct();
+                    }])
+                    ->select($fields)
                     ->orderBy('id', 'ASC')
                     ->get();
             }
             else{
-                $children = $parent->children()->where('company_id', $com_id)
+                $children = $parent->children()
+                    ->with('topic_type:topic_type.id,topic_type.type_name')
+                    ->with(['ledgers' => function($q){
+                        $q->select(['ledger.ledger_key'])->distinct();
+                    }])
+                    ->with(['dimensions' => function($q){
+                        $q->select(['dimension.dim_code'])->distinct();
+                    }])
+                    ->where('company_id', $com_id)
                     ->select($fields)
                     ->orderBy('id', 'ASC')
                     ->get();
             }
             
 
-            $arr_children =  self::createChildrenList($children, $parent, $com_id, $is_trait);
+            $arr_children =  self::createChildrenList($children, $parent, $com_id, $fields, $is_trait);
 
             $list = array_merge($list, $arr_children);
 
@@ -108,7 +131,7 @@ class Topic extends Model{
         
     }
     
-    private static function createChildrenList($children=[], $parent, $com_id, $is_trait=false, $h=1){
+    private static function createChildrenList($children=[], $parent, $com_id, $fields, $is_trait=false, $h=1){
         
         if(empty($children))
             return [];
@@ -138,15 +161,34 @@ class Topic extends Model{
 
             $temp_children = null;
             if($com_id == null){
-                $temp_children = $item->children()->get();
+                $temp_children = $item->children()
+                    ->with('topic_type:topic_type.id,topic_type.type_name')
+                    ->with(['ledgers' => function($q){
+                        $q->select(['ledger.ledger_key'])->distinct();
+                    }])
+                    ->with(['dimensions' => function($q){
+                        $q->select(['dimension.dim_code'])->distinct();
+                    }])
+                    ->select($fields)
+                    ->get();
             }
             else{
-                $temp_children = $item->children()->where('company_id', $com_id)->get();
+                $temp_children = $item->children()
+                    ->with('topic_type:topic_type.id,topic_type.type_name')
+                    ->with(['ledgers' => function($q){
+                        $q->select(['ledger.ledger_key'])->distinct();
+                    }])
+                    ->with(['dimensions' => function($q){
+                        $q->select(['dimension.dim_code'])->distinct();
+                    }])
+                    ->where('company_id', $com_id)
+                    ->select($fields)
+                    ->get();
             }
             
 
             if($temp_children != null){
-                $arr_children = self::createChildrenList($temp_children, $item, $com_id,  $is_trait, $h + 1);
+                $arr_children = self::createChildrenList($temp_children, $item, $com_id, $fields, $is_trait, $h + 1);
                 $list = array_merge($list, $arr_children);
             }
 
@@ -161,7 +203,7 @@ class Topic extends Model{
 
         $entries = Topic::with('topic_type:id,type_name')
             ->with(['dimensions' => function($q){
-                $q->select(['dimension.id', 'dimension.dim_code']);
+                $q->select(['dimension.dim_code'])->distinct();
             }])
             ->where('status', 1)
             ->where('company_id', $com_id)

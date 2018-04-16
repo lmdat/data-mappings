@@ -29,7 +29,9 @@ class V1Controller extends Controller{
         $list = [];
         // Ledger::where('company_id', $company_id)
         // Ledger::with(['topics' => function($q){$q->select(['topic.id']);}])
-        Ledger::with('topics:topic.id')
+        Ledger::with(['topics' => function($q){
+            $q->select(['topic.id'])->distinct();
+        }])
             ->where('company_id', $company_id)
             ->where('ledger_code', $ledger_code)
             ->chunk(500, function($subset) use(&$entries){

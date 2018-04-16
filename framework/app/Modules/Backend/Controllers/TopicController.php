@@ -48,10 +48,10 @@ class TopicController extends Controller{
         
         $topic_type = TopicType::all();
 
-        $root_parent = Topic::getRootParentList($this->companyId);
-       
         $fields = ['id', 'topic_name', 'type_id', 'is_leaf'];
 
+        $root_parent = Topic::getRootParentList($fields, $this->companyId);
+       
         $tree_data = [];
         if(count($root_parent) > 0){
             $tree_data = Topic::createTreeList($root_parent, $fields, $this->companyId, true);
@@ -64,7 +64,7 @@ class TopicController extends Controller{
         $currentPageSearchResults = $col->slice(($currentPage - 1) * $perPage, $perPage)->all();
         $entries = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
         $entries->setPath(route('topic', [str_replace('?', '', $qs)]));
-        //dd($entries);
+        // dd($entries->toArray());
       
         if($id != null){
             $item = Topic::findOrFail($id);

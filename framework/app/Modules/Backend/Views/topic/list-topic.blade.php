@@ -29,37 +29,23 @@
                             <td @if($item->is_leaf == 0) class='text-info font-weight-bold' @endif>{!! $item->tmp_name !!}</td>
                             <td>{{ $item->topic_type->type_name }}</td>
                             <td>
-                            <?php
-                                //$ledgers = $item->with('ledger_item')->get();
-                                $pivot = [];
-                                if($item->is_leaf == 1){
-                                    $pivot = DB::table('ledger_topic')->where('topic_code', $item->id)
-                                        ->where('company_id', session()->get('selected_company'))
-                                        ->get();
-                                }
-                                $n = count($pivot);
-                            ?>
-                            @for($i=0; $i<$n; $i++)
-                            <i class="fa fa-check-square-o"></i><small>{{$pivot[$i]->ledger_code}}</small>@if($i < $n - 1)&nbsp;@endif
-                                @if($i % $n == 2) <br/> @endif
-                            @endfor
-                            
-                            </td>
-                            <td>
-                                <?php
-                                    //$ledgers = $item->with('topic_dimension')->get();
-                                    $pivot = [];
-                                    if($item->is_leaf == 1){
-                                        $pivot = DB::table('topic_dimension')->where('topic_id', $item->id)
-                                            ->where('company_id', session()->get('selected_company'))
-                                            ->get();
-                                    }
-                                    $n = count($pivot);
-                                ?>
+                            @if($item->is_leaf == 1)
+                                <?php $n = count($item->ledgers); ?>
                                 @for($i=0; $i<$n; $i++)
-                                <i class="fa fa-check-square-o"></i><small>{{$pivot[$i]->dim_code}}</small>@if($i < $n - 1)&nbsp;@endif
+                                <i class="fa fa-check-square-o"></i><small>{{$item->ledgers[$i]->ledger_key}}</small>@if($i < $n - 1)&nbsp;@endif
                                     @if($i % $n == 2) <br/> @endif
                                 @endfor
+                            @endif
+                            </td>
+                            <td>
+                              
+                                @if($item->is_leaf == 1)
+                                    <?php $n = count($item->dimensions); ?>
+                                    @for($i=0; $i<$n; $i++)
+                                    <i class="fa fa-check-square-o"></i><small>{{$item->dimensions[$i]->dim_code}}</small>@if($i < $n - 1)&nbsp;@endif
+                                        @if($i % $n == 2) <br/> @endif
+                                    @endfor
+                                @endif
                                 
                             </td>
                             <td>
