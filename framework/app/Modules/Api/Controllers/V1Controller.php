@@ -36,7 +36,6 @@ class V1Controller extends Controller{
             ->where('ledger_code', $ledger_code)
             ->chunk(500, function($subset) use(&$entries){
                 foreach($subset as $ledger){
-                    // Vii::pr($ledger->topics()->select('topic.id')->get()->toArray());
                     // foreach($ledger->topics()->select('topic.id')->get() as $topic){
                     foreach($ledger->topics as $topic){
                         if(array_key_exists($topic->id, $entries)){
