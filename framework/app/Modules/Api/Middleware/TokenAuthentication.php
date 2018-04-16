@@ -28,14 +28,13 @@ class TokenAuthentication {
 
         if(preg_match('/(\/api|\/api\/)$/', $base_url, $match)){
 
-//            if(!$request->expectsJson()){
-//                return response()->json(['error' => 'expects_respond_with_json_only'], 401);
-//            }
+            // if(!$request->isJson()){
+            //     return response()->json(['error' => 'json_only'], 401);
+            // }
 
             $token = $request->input('token', null);
             if(!$token){
                 $token = JWTAuth::getToken();
-                //    return response()->json(['error_code' => 'INVALID_TOKEN', 'message' => 'The token is incorrect.'], 401);
             }
 
             try{

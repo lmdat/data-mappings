@@ -20,19 +20,23 @@ class V1Controller extends Controller{
 
     public function getLedgers(Request $request){
 
-        $company_id = 1;
-        $ledger_code = 'A';
+        $company_id = $request->input('company_id', 1);
+        $ledger_code = $request->input('ledger_code', 'A');
 
         // $leaf_items = Topic::where('is_leaf', 1);
         $entries = Topic::createParentToChildren($company_id);
         
         $list = [];
-        Ledger::where('company_id', $company_id)
+        // Ledger::where('company_id', $company_id)
+        // Ledger::with(['topics' => function($q){$q->select(['topic.id']);}])
+        Ledger::with('topics:topic.id')
+            ->where('company_id', $company_id)
             ->where('ledger_code', $ledger_code)
             ->chunk(500, function($subset) use(&$entries){
                 foreach($subset as $ledger){
                     // Vii::pr($ledger->topics()->select('topic.id')->get()->toArray());
-                    foreach($ledger->topics()->select('topic.id')->get() as $topic){
+                    // foreach($ledger->topics()->select('topic.id')->get() as $topic){
+                    foreach($ledger->topics as $topic){
                         if(array_key_exists($topic->id, $entries)){
                             // $entries[$topic->id]['amount_list'][] = $ledger->base_amount . ' | ' . $ledger->ledger_key;
                             $entries[$topic->id]['amount_list'][] = $ledger->base_amount;

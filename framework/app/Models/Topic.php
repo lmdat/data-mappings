@@ -46,7 +46,7 @@ class Topic extends Model{
     }
 
     public function dimensions(){
-        return $this->belongsToMany('App\Models\Dimension', 'topic_dimension', 'topic_id', 'dim_code', null, 'dim_code');
+        return $this->belongsToMany('App\Models\Dimension', 'topic_dimension', 'topic_id', 'dim_code', null, 'dim_code');//->withPivot('company_id');
     }
 
     public function company(){
@@ -159,7 +159,10 @@ class Topic extends Model{
 
     public static function createParentToChildren($com_id){
 
-        $entries = Topic::with('topic_type')
+        $entries = Topic::with('topic_type:id,type_name')
+            ->with(['dimensions' => function($q){
+                $q->select(['dimension.id', 'dimension.dim_code']);
+            }])
             ->where('status', 1)
             ->where('company_id', $com_id)
             ->where('is_leaf', 1)
@@ -185,13 +188,14 @@ class Topic extends Model{
         $list = [];
         foreach($entries as $c){
             $a = self::findUntilReachRoot($c, $p_list);
-            $pivot = DB::table('topic_dimension')->where('topic_id', $c->id)
-                        ->where('company_id', $com_id)
-                        ->get();
+            // $pivot = DB::table('topic_dimension')->where('topic_id', $c->id)
+            //             ->where('company_id', $com_id)
+            //             ->get();
             $list[$a[0]] = [
                 'topics' => array_reverse($a),
                 'type' => strtolower($c->topic_type->type_name),
-                'dimensions' => self::getTopicDimensions($c->id, $com_id),
+                'dimensions' => self::getTopicDimensions($c->dimensions),
+                
                 'amount_list' => []
             ];
         }
@@ -216,12 +220,12 @@ class Topic extends Model{
         return $a;
     }
 
-    private static function getTopicDimensions($topic_id, $com_id){
-        $pivot = DB::table('topic_dimension')->where('topic_id', $topic_id)
-                    ->where('company_id', $com_id)
-                    ->get();
+    private static function getTopicDimensions($dim_list){
+        // $pivot = DB::table('topic_dimension')->where('topic_id', $topic_id)
+        //             ->where('company_id', $com_id)
+        //             ->get();
         $a = [];
-        foreach($pivot as $item){
+        foreach($dim_list as $item){
             $a[] = $item->dim_code;
         }
 

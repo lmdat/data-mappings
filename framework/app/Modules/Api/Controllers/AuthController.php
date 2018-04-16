@@ -41,10 +41,11 @@ class AuthController extends BaseController{
                 }
                 
                 return response()->json(['success' => false, 'error' => 'INCORRECT_PASSWORD'], 401);
+                
             }
         }
         catch(JWTException $e){
-            return response()->json(['success' => false, 'error' => 'FAILED_TO_LOGIN'], 500);
+            return response()->json(['success' => false, 'error' => 'COULD_NOT_CREATE_TOKEN'], 500);
         }
 
         $user = auth('api')->user();
