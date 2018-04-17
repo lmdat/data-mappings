@@ -37,33 +37,43 @@ class ModuleServiceProvider extends ServiceProvider{
         }
         
         $this->namespace = join('\\', ['App', 'Modules', $mod, 'Controllers']);
-        $view_dir = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Views']);
+        
 
         // include __DIR__ . '/' . $mod . '/routes.php';
         // $this->loadRoutesFrom(__DIR__ . '/' . $mod . '/routes.php');
         if($mod == $modules['api']['folder_name']){
-            $route_dir = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Routes']);
-            $entries = scandir($route_dir);
-            foreach($entries as $f){
-                if($f == '.' || $f == '..')
-                    continue;
-                
-                $route_file = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Routes', $f]);
-                $b = explode('.', $f);
-                Route::prefix($b[0])
-                    ->namespace($this->namespace)
-                    ->group($route_file);
-            }
+            $this->mapApiRoutes($mod);
         }
         else{
-            $route_file = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Routes', 'web.php']);
-            Route::middleware('web')
+            $this->mapWebRoutes($mod);
+        }
+        
+    }
+
+    protected function mapApiRoutes($mod){
+        $route_dir = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Routes']);
+        $entries = scandir($route_dir);
+        foreach($entries as $f){
+            if($f == '.' || $f == '..')
+                continue;
+            
+            $route_file = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Routes', $f]);
+            $b = explode('.', $f);
+            Route::prefix($b[0])
                 ->namespace($this->namespace)
                 ->group($route_file);
         }
-        
-        if(is_dir($view_dir)){
+    }
 
+    protected function mapWebRoutes($mod){
+        $view_dir = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Views']);
+
+        $route_file = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Routes', 'web.php']);
+            Route::middleware('web')
+                ->namespace($this->namespace)
+                ->group($route_file);
+
+        if(is_dir($view_dir)){
             // if($mod == $modules['backend']['folder_name']){
             //     $this->loadViewsFrom(__DIR__ . '/' . $mod . '/Views', $mod);
             // }
@@ -72,7 +82,6 @@ class ModuleServiceProvider extends ServiceProvider{
             // }
 
             $this->loadViewsFrom($view_dir, $mod);
-
         }
     }
 }
