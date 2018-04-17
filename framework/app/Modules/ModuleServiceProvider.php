@@ -36,7 +36,7 @@ class ModuleServiceProvider extends ServiceProvider{
             $mod = $modules['frontend']['folder_name'];
         }
         
-        $this->namespace = join(DIRECTORY_SEPARATOR, ['App', 'Modules', $mod, 'Controllers']);
+        $this->namespace = join('\\', ['App', 'Modules', $mod, 'Controllers']);
         $view_dir = implode(DIRECTORY_SEPARATOR, [__DIR__,  $mod, 'Views']);
 
         // include __DIR__ . '/' . $mod . '/routes.php';
